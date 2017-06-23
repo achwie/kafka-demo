@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>achwie</groupId>
-  <artifactId>hystrix-demo</artifactId>
+  <artifactId>microservices-shop-demo</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   

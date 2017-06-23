@@ -3,11 +3,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>hystrix-demo-stock</artifactId>
+  <artifactId>microservices-shop-demo-stock</artifactId>
 
   <parent>
     <groupId>achwie</groupId>
-    <artifactId>hystrix-demo</artifactId>
+    <artifactId>microservices-shop-demo</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
 
@@ -26,12 +26,12 @@
     </dependency>
     <dependency>
       <groupId>achwie</groupId>
-      <artifactId>hystrix-demo-util</artifactId>
+      <artifactId>microservices-shop-demo-util</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>achwie</groupId>
-      <artifactId>hystrix-demo-service-urls</artifactId>
+      <artifactId>microservices-shop-demo-service-urls</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
