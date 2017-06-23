@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 
 /**
  * A very simple CSV reader with no support for escaping, quoting, and such.
+ * Supports bash style line comments (lines starting with "#").
  * 
  * @author 17.12.2015, Achim Wiedemann
  */
@@ -30,7 +31,13 @@ public class SimpleCsvReader {
     final BufferedReader r = new BufferedReader(new InputStreamReader(is));
     String line;
     while ((line = r.readLine()) != null) {
-      final String[] values = line.trim().split("\\s*,\\s*");
+      final String trimmmedLine = line.trim();
+
+      // Ommit comment lines
+      if (trimmmedLine.startsWith("#"))
+        continue;
+
+      final String[] values = trimmmedLine.split("\\s*,\\s*");
       if (values.length > 0 && values[0].trim().length() > 0) {
         lineHandler.handleLine(values);
       }

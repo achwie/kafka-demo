@@ -9,10 +9,14 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.netflix.hystrix.contrib.metrics.eventstream.HystrixMetricsStreamServlet;
 
 import achwie.hystrixdemo.auth.SecurityFilterProxy;
 import achwie.hystrixdemo.auth.SessionService;
+import achwie.hystrixdemo.util.security.SecurityScope;
+import achwie.hystrixdemo.util.security.http.SecurityScopeDeserializer;
 
 /**
  * 
@@ -39,5 +43,14 @@ public class FrontendStarter {
   @Bean
   public ServletRegistrationBean createHystrixMetricsStreamServlet() {
     return new ServletRegistrationBean(new HystrixMetricsStreamServlet(), "/hystrix.stream");
+  }
+
+  @Bean
+  public Module createJacksonModule() {
+    final SimpleModule jacksonModule = new SimpleModule();
+
+    jacksonModule.addDeserializer(SecurityScope.class, new SecurityScopeDeserializer());
+
+    return jacksonModule;
   }
 }

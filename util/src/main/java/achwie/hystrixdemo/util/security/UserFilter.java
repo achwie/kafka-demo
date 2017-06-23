@@ -1,6 +1,7 @@
 package achwie.hystrixdemo.util.security;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -68,16 +69,22 @@ public class UserFilter implements Filter {
   public void destroy() {
   }
 
-  private SecurityContext createSecurityContext(String user, String scopesStr) {
-    Set<String> scopes = new HashSet<String>();
+  private SecurityContext createSecurityContext(String user, String scopeNamesStr) {
+    Set<SecurityScope> scopes = new HashSet<>();
 
-    if (scopesStr != null) {
-      final String[] scopesArr = scopesStr.split(":");
+    if (scopeNamesStr != null) {
+      final String[] scopeNamesArr = scopeNamesStr.split(":");
 
-      for (String scope : scopesArr)
-        scopes.add(scope);
+      for (String scopeName : scopeNamesArr) {
+        final SecurityScope scope = SecurityScope.fromName(scopeName);
+        if (scope != null)
+          scopes.add(scope);
+      }
     }
 
-    return new SecurityContext(user, scopes);
+    // Empty EnumSets need to be created differently
+    final EnumSet<SecurityScope> scopeSet = !scopes.isEmpty() ? EnumSet.copyOf(scopes) : EnumSet.noneOf(SecurityScope.class);
+
+    return new SecurityContext(user, scopeSet);
   }
 }

@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import achwie.hystrixdemo.auth.SessionService;
+import achwie.hystrixdemo.auth.User;
 import achwie.hystrixdemo.catalog.CatalogItem;
 
 /**
@@ -15,11 +17,13 @@ import achwie.hystrixdemo.catalog.CatalogItem;
 public class CartService {
   private final RestTemplate restTemplate;
   private final String cartServiceBaseUrl;
+  private final SessionService sessionService;
 
   @Autowired
-  public CartService(@Value("${service.cart.baseurl}") String cartServiceBaseUrl, RestTemplate restTemplate) {
+  public CartService(@Value("${service.cart.baseurl}") String cartServiceBaseUrl, RestTemplate restTemplate, SessionService sessionService) {
     this.restTemplate = restTemplate;
     this.cartServiceBaseUrl = cartServiceBaseUrl;
+    this.sessionService = sessionService;
   }
 
   /**
@@ -41,7 +45,9 @@ public class CartService {
    * @return The cart (empty cart if there was no cart with the given ID).
    */
   public Cart getCart(String cartId) {
-    return new GetCartCommand(restTemplate, cartServiceBaseUrl, cartId).execute();
+    final User currentUser = sessionService.getSessionUser();
+
+    return new GetCartCommand(restTemplate, cartServiceBaseUrl, cartId, currentUser).execute();
   }
 
   /**

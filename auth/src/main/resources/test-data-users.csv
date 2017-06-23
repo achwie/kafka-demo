@@ -1,13 +1,14 @@
-1, john, doe
-2, jane, doe
-3, test, test
-4, test0, test0
-5, test1, test1
-6, test2, test2
-7, test3, test3
-8, test4, test4
-9, test5, test5
-10, test6, test6
-11, test7, test7
-12, test8, test8
-13, test9, test9
+# <ID>, <username>, <password>, <colon-separated-scopes>
+1, john, doe, shopper
+2, jane, doe, shopper
+3, test, test, shopper
+4, test0, test0, shopper
+5, test1, test1, shopper
+6, test2, test2, shopper
+7, test3, test3, shopper
+8, test4, test4, shopper
+9, test5, test5, shopper
+10, test6, test6, shopper
+11, test7, test7, shopper
+12, test8, test8, shopper
+13, test9, test9, shopper

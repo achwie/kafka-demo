@@ -1,8 +1,6 @@
 package achwie.hystrixdemo.util.security;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -19,12 +17,11 @@ import java.util.Set;
  */
 public class SecurityContext {
   private final String user;
-  private final Set<String> scopes = new HashSet<>();
+  private final Set<SecurityScope> scopes;
 
-  public SecurityContext(String user, Collection<String> scopes) {
+  public SecurityContext(String user, Set<SecurityScope> scopes) {
     this.user = user;
-    if (scopes != null)
-      this.scopes.addAll(scopes);
+    this.scopes = scopes;
   }
 
   /**
@@ -33,8 +30,24 @@ public class SecurityContext {
    * @return The scopes that the current user has - will return an empty
    *         {@link Set} if n/a.
    */
-  public Set<String> getScopes() {
+  public Set<SecurityScope> getScopes() {
     return Collections.unmodifiableSet(scopes);
+  }
+
+  /**
+   * Returns whether this security context contains the given scope.
+   * 
+   * @param scopeToCheck The scope to check.
+   * @return Whether this security context contains a scope with the given scope
+   *         name.
+   */
+  public boolean containsScope(SecurityScope scopeToCheck) {
+
+    for (SecurityScope scope : scopes)
+      if (scope.containsScope(scopeToCheck))
+        return true;
+
+    return false;
   }
 
   /**

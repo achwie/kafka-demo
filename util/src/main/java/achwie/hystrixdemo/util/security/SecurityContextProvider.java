@@ -4,7 +4,7 @@ package achwie.hystrixdemo.util.security;
  * <p>
  * Holds security contexts on a per-thread basis (using a {@link ThreadLocal}).
  * Can be used to conveniently access the security context of a request thread.
- * Usually used in conjunction with a {@link UserFilter servlet filter}.
+ * Usually used in conjunction with a {@link UserFilter user servlet filter}.
  * </p>
  * <p>
  * <strong>Thread safety:</strong> Since this class employs a

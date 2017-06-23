@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import achwie.hystrixdemo.util.SimpleCsvReader;
+import achwie.hystrixdemo.util.security.SecurityScope;
+import achwie.hystrixdemo.util.security.http.SecurityScopeUtils;
 
 /**
  * 
@@ -21,13 +24,15 @@ public class UserRepository {
   {
     try (final InputStream is = UserRepository.class.getResourceAsStream("/test-data-users.csv")) {
       SimpleCsvReader.readLines(is, values -> {
-        if (values.length != 3)
+        if (values.length != 4)
           return;
 
         String id = values[0];
         String name = values[1];
         String pass = values[2];
-        users.put(key(name, pass), new User(id, name));
+        Set<SecurityScope> scopes = SecurityScopeUtils.parseScopes(values[3]);
+
+        users.put(key(name, pass), new User(id, name, scopes));
       });
     } catch (IOException e) {
       e.printStackTrace();

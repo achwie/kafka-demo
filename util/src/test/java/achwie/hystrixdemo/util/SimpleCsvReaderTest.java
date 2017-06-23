@@ -49,6 +49,16 @@ public class SimpleCsvReaderTest {
   }
 
   @Test
+  public void readLine_whenContainsCommentLine_thenIgnoreCommentLine() throws IOException {
+    final InputStream is = new ByteArrayInputStream(" # Comment\n  1, 2,".getBytes());
+    final List<String[]> actualLines = new ArrayList<>();
+
+    SimpleCsvReader.readLines(is, values -> actualLines.add(values));
+
+    assertArrayEquals(new String[] { "1", "2" }, actualLines.get(0));
+  }
+
+  @Test
   public void readLine_whenEmptyContent_thenNotCallHandler() throws IOException {
     final InputStream is = new ByteArrayInputStream("   ".getBytes());
     final List<Object> invocations = new ArrayList<>();
