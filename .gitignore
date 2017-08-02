@@ -14,3 +14,6 @@ acceptance-tests/jgiven-reports
 
 # Local environment settings
 service-urls/src/main/resources/config/application.properties
+
+# Docker contexts
+*/docker/context
