@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-ENV JAR "microservices-shop-demo-auth.jar"
+ENV JAR "kafka-demo-auth.jar"
 
 RUN apt-get update && apt-get install -y \
 	openjdk-8-jre

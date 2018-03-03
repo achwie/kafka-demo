@@ -3,11 +3,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>microservices-shop-demo-auth</artifactId>
+  <artifactId>kafka-demo-auth</artifactId>
 
   <parent>
     <groupId>achwie</groupId>
-    <artifactId>microservices-shop-demo</artifactId>
+    <artifactId>kafka-demo</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
 
@@ -26,12 +26,12 @@
     </dependency>
     <dependency>
       <groupId>achwie</groupId>
-      <artifactId>microservices-shop-demo-util</artifactId>
+      <artifactId>kafka-demo-util</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>achwie</groupId>
-      <artifactId>microservices-shop-demo-service-urls</artifactId>
+      <artifactId>kafka-demo-service-urls</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>

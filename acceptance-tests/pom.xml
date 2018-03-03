@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>achwie</groupId>
-  <artifactId>microservices-shop-demo-acceptance-tests</artifactId>
+  <artifactId>kafka-demo-acceptance-tests</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <!-- Not using parent POM here since Spring Boot seems to mess up my Selenium 
