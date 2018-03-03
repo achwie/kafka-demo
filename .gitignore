@@ -1,6 +1,7 @@
 # Eclipse files
-*/.classpath
-*/.project
+.classpath
+.project
+.settings
 */.settings/*
 */.wtpmodules
 # EGit seems to create these in every module
