@@ -1,4 +1,4 @@
-package achwie.shop.order;
+package achwie.shop.order.read;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,14 +8,26 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import achwie.shop.order.Order;
+
 /**
  * 
  * @author 20.11.2015, Achim Wiedemann
  */
 @Component
-public class OrderRepository {
+public class InMemoryOrderRepository {
   private final Object lock = new Object();
   private final Map<String, List<Order>> orders = new HashMap<>();
+
+  public List<Order> getOrdersForUser(String userId) {
+    if (userId == null)
+      return Collections.emptyList();
+
+    synchronized (lock) {
+      final List<Order> ordersForUser = orders.get(userId);
+      return (ordersForUser != null) ? ordersForUser : Collections.emptyList();
+    }
+  }
 
   public void addOrder(Order order) {
     final String userId = order.getUserId();
@@ -28,16 +40,6 @@ public class OrderRepository {
       }
 
       ordersForUser.add(order);
-    }
-  }
-
-  public List<Order> getOrdersForUser(String userId) {
-    if (userId == null)
-      return Collections.emptyList();
-
-    synchronized (lock) {
-      final List<Order> ordersForUser = orders.get(userId);
-      return (ordersForUser != null) ? ordersForUser : Collections.emptyList();
     }
   }
 }

@@ -37,6 +37,11 @@
       <artifactId>hystrix-metrics-event-stream</artifactId>
     </dependency>
     <dependency>
+        <groupId>org.apache.kafka</groupId>
+        <artifactId>kafka-clients</artifactId>
+        <version>${kafka.version}</version>
+    </dependency>
+    <dependency>
       <groupId>achwie</groupId>
       <artifactId>kafka-demo-service-urls</artifactId>
       <version>0.1-SNAPSHOT</version>

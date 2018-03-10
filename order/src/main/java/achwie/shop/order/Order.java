@@ -5,6 +5,9 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * 
  * @author 20.11.2015, Achim Wiedemann
@@ -15,7 +18,9 @@ public class Order {
   private final List<OrderItem> orderItems = new ArrayList<>();
   private final Calendar orderDate = Calendar.getInstance();
 
-  public Order(String userId) {
+  // TODO: Don't want serialization info in my domain classes
+  @JsonCreator
+  public Order(@JsonProperty("userId") String userId) {
     this.userId = userId;
   }
 

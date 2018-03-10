@@ -30,6 +30,7 @@
   <properties>
     <java.version>1.8</java.version>
     <hystrix.version>1.4.23</hystrix.version>
+    <kafka.version>1.0.0</kafka.version>
   </properties>
   
   <dependencyManagement>
