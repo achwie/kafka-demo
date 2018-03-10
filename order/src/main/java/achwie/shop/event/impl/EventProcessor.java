@@ -58,8 +58,8 @@ public class EventProcessor implements Runnable {
   @SuppressWarnings("unchecked")
   private <T> void handleEvent(Event evt) {
     final EventHeader header = evt.getHeader();
-    final int typeCode = header.getType();
-    final int versionCode = header.getVersion();
+    final int typeCode = header.getTypeCode();
+    final int versionCode = header.getVersionCode();
     final Class<T> eventType = (Class<T>) handlerChain.getEventTypeFor(typeCode, versionCode);
 
     if (eventType != null) {

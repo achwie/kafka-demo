@@ -40,7 +40,7 @@ public class JsonSerializerWrapper implements EventSerializer, EventWrapper {
       throw new IllegalStateException("Couldn't find version for type " + payload.getClass());
     }
 
-    final JsonEventHeader header = new JsonEventHeader(eventVersion.getTypeCode(), eventVersion.getVersionCode());
+    final JsonEventHeader header = new JsonEventHeader(eventVersion.getVersionCode(), eventVersion.getTypeCode());
     final JsonEvent event = new JsonEvent(header, payload);
 
     return event;
@@ -65,7 +65,7 @@ public class JsonSerializerWrapper implements EventSerializer, EventWrapper {
     try {
       return objectMapper.writeValueAsString(evt);
     } catch (JsonProcessingException e) {
-      final String msg = String.format("Could not serialize payload! (event-type: %d, event-version: %d)", header.getType(), header.getVersion());
+      final String msg = String.format("Could not serialize payload! (type-code: %d, version-code: %d)", header.getTypeCode(), header.getVersionCode());
       throw new SerializationException(msg, e);
     }
   }
@@ -82,8 +82,8 @@ public class JsonSerializerWrapper implements EventSerializer, EventWrapper {
 
       try {
         final JsonEventHeader header = objectMapper.reader().treeToValue(headerNode, JsonEventHeader.class);
-        final int typeCode = header.getType();
-        final int versionCode = header.getVersion();
+        final int typeCode = header.getTypeCode();
+        final int versionCode = header.getVersionCode();
 
         try {
           final Class<?> payloadClass = eventTypeMapper.getEventTypeFor(typeCode, versionCode);
@@ -91,13 +91,14 @@ public class JsonSerializerWrapper implements EventSerializer, EventWrapper {
             final Object payload = objectMapper.reader().treeToValue(payloadNode, payloadClass);
             return new JsonEvent(header, payload);
           } else {
-            final String msg = String.format("Couldn't find a payload type for event (event-type: %d, event-version: %d)! Discarding event!", header.getType(),
-                header.getVersion());
+            final String msg = String.format("Couldn't find a payload type for event (event-type: %d, event-version: %d)! Discarding event!",
+                header.getTypeCode(),
+                header.getVersionCode());
             throw new SerializationException(msg);
           }
         } catch (JsonProcessingException e) {
-          final String msg = String.format("Couldn't deserialize event payload (event-type: %d, event-version: %d)! Discarding event!", header.getType(),
-              header.getVersion());
+          final String msg = String.format("Couldn't deserialize event payload (event-type: %d, event-version: %d)! Discarding event!", header.getTypeCode(),
+              header.getVersionCode());
           throw new SerializationException(msg);
         }
       } catch (JsonProcessingException e) {

@@ -37,7 +37,7 @@ public class KafkaEventSource implements EventSource {
     try {
       return eventBuffer.poll(timeoutMillis, TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
-      System.err.println("JsonEvent source polling has been interrupted! Shutting down Kafka poller thread... (details: " + e.getMessage() + ")");
+      System.err.println("Event source polling has been interrupted! Shutting down Kafka poller thread... (details: " + e.getMessage() + ")");
       Thread.interrupted(); // Reset flag
       poller.stop();
       return null;

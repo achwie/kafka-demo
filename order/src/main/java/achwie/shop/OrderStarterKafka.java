@@ -28,20 +28,21 @@ import achwie.shop.order.eventhandler.OrderEventHandler;
 import achwie.shop.order.read.InMemoryOrderRepository;
 
 /**
+ * Starts the order service with Apache Kafka as the event transport.
  * 
  * @author 02.01.2016, Achim Wiedemann
  */
 @SpringBootApplication
-public class OrderStarter {
+public class OrderStarterKafka {
   private static final String BOOTSTRAP_SERVERS = "192.168.56.2:9092,192.168.56.2:9093,192.168.56.2:9094";
 
   public static void main(String[] args) throws Exception {
-    SpringApplication.run(OrderStarter.class, args);
+    SpringApplication.run(OrderStarterKafka.class, args);
   }
 
   @Bean
   @Autowired
-  public EventSink createKafkaEventSink(EventSerializer eventFactory, @Value("${kafka.topicname.orders}") String topicName) {
+  public EventSink createEventSink(EventSerializer eventFactory, @Value("${kafka.topicname.orders}") String topicName) {
     // TODO: Properties should be passed in from the outside
     Properties props = new Properties();
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
@@ -61,7 +62,7 @@ public class OrderStarter {
 
   @Bean
   @Autowired
-  public EventSource createKafkaEventSource(@Value("${kafka.topicname.orders}") String topicName, EventSerializer eventFactory) {
+  public EventSource createEventSource(@Value("${kafka.topicname.orders}") String topicName, EventSerializer eventFactory) {
     // TODO: Properties should be passed in from the outside
     Properties props = new Properties();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
@@ -76,7 +77,7 @@ public class OrderStarter {
 
   @Bean
   @Autowired
-  public EventSerializer createKafkaEventFactory(ObjectMapper objectMapper, EventHandlerChain eventHandlerChain) {
+  public JsonSerializerWrapper createEventSerializer(ObjectMapper objectMapper, EventHandlerChain eventHandlerChain) {
     return new JsonSerializerWrapper(objectMapper, eventHandlerChain);
   }
 

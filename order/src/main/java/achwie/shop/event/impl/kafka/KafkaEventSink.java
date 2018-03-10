@@ -33,7 +33,7 @@ public class KafkaEventSink implements EventSink {
 
     try {
       final EventHeader header = evt.getHeader();
-      final String key = Integer.toString(header.getType());
+      final String key = Integer.toString(header.getTypeCode());
       final String payloadJson = eventSerializer.serialize(evt);
 
       kafkaProducer.send(new ProducerRecord<String, String>(topicName, key, payloadJson));
