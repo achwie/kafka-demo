@@ -12,6 +12,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import achwie.shop.event.api.Event;
 import achwie.shop.event.api.EventSource;
+import achwie.shop.event.impl.EventSerializer;
+import achwie.shop.event.impl.SerializationException;
 
 /**
  * 
@@ -23,11 +25,11 @@ public class KafkaEventSource implements EventSource {
   private final BlockingQueue<Event> eventBuffer;
   private final KafkaConsumerPoller poller;
 
-  public KafkaEventSource(Properties props, String topicName, KafkaEventFactory eventFactory) {
+  public KafkaEventSource(Properties props, String topicName, EventSerializer eventSerializer) {
     eventBuffer = new ArrayBlockingQueue<>(BUFFER_CAPACITY);
 
     final String pollerThreadName = "Kafka poller thread [topic: " + topicName + "]";
-    new Thread(poller = new KafkaConsumerPoller(props, topicName, eventFactory, eventBuffer), pollerThreadName).start();
+    new Thread(poller = new KafkaConsumerPoller(props, topicName, eventSerializer, eventBuffer), pollerThreadName).start();
   }
 
   @Override
@@ -46,14 +48,14 @@ public class KafkaEventSource implements EventSource {
     private static final int POLL_TIME_MILLIS = 1000;
     private final Properties props;
     private final String topicName;
-    private final KafkaEventFactory eventFactory;
+    private final EventSerializer eventSerializer;
     private final BlockingQueue<Event> eventBuffer;
     private volatile boolean running = true;
 
-    public KafkaConsumerPoller(Properties props, String topicName, KafkaEventFactory eventFactory, BlockingQueue<Event> eventBuffer) {
+    public KafkaConsumerPoller(Properties props, String topicName, EventSerializer eventSerializer, BlockingQueue<Event> eventBuffer) {
       this.props = props;
       this.topicName = topicName;
-      this.eventFactory = eventFactory;
+      this.eventSerializer = eventSerializer;
       this.eventBuffer = eventBuffer;
     }
 
@@ -67,11 +69,13 @@ public class KafkaEventSource implements EventSource {
             try {
               final String value = record.value();
 
-              final Event event = eventFactory.deserialize(value);
+              final Event event = eventSerializer.deserialize(value);
 
               if (event != null)
                 eventBuffer.put(event);
 
+            } catch (SerializationException e) {
+              System.err.println("Could not deserialize event payload! Disregarding event!");
             } catch (InterruptedException e) {
               System.err.println(
                   "Waiting to put element into full event buffer has been interrupted! Shutting down Kafka poller thread... (details: " + e.getMessage()

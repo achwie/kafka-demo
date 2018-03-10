@@ -1,4 +1,4 @@
-package achwie.shop.event.impl.kafka;
+package achwie.shop.event.impl.json;
 
 import java.util.Objects;
 

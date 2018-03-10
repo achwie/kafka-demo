@@ -17,10 +17,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import achwie.shop.event.api.EventSink;
 import achwie.shop.event.api.EventSource;
-import achwie.shop.event.impl.kafka.KafkaEventFactory;
+import achwie.shop.event.impl.EventHandlerChain;
+import achwie.shop.event.impl.EventProcessor;
+import achwie.shop.event.impl.EventSerializer;
+import achwie.shop.event.impl.EventWrapper;
+import achwie.shop.event.impl.json.JsonSerializerWrapper;
 import achwie.shop.event.impl.kafka.KafkaEventSink;
 import achwie.shop.event.impl.kafka.KafkaEventSource;
-import achwie.shop.order.eventhandler.EventHandlerChain;
+import achwie.shop.order.eventhandler.OrderEventHandler;
+import achwie.shop.order.read.InMemoryOrderRepository;
 
 /**
  * 
@@ -36,7 +41,7 @@ public class OrderStarter {
 
   @Bean
   @Autowired
-  public EventSink createKafkaEventSink(ObjectMapper objectMapper, @Value("${kafka.topicname.orders}") String topicName) {
+  public EventSink createKafkaEventSink(EventSerializer eventFactory, @Value("${kafka.topicname.orders}") String topicName) {
     // TODO: Properties should be passed in from the outside
     Properties props = new Properties();
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
@@ -51,12 +56,12 @@ public class OrderStarter {
 
     final KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(props);
 
-    return new KafkaEventSink(kafkaProducer, topicName, objectMapper);
+    return new KafkaEventSink(kafkaProducer, topicName, eventFactory);
   }
 
   @Bean
   @Autowired
-  public EventSource createKafkaEventSource(@Value("${kafka.topicname.orders}") String topicName, KafkaEventFactory eventFactory) {
+  public EventSource createKafkaEventSource(@Value("${kafka.topicname.orders}") String topicName, EventSerializer eventFactory) {
     // TODO: Properties should be passed in from the outside
     Properties props = new Properties();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
@@ -71,7 +76,27 @@ public class OrderStarter {
 
   @Bean
   @Autowired
-  public KafkaEventFactory createKafkaEventFactory(ObjectMapper objectMapper, EventHandlerChain eventHandlerChain) {
-    return new KafkaEventFactory(objectMapper, eventHandlerChain);
+  public EventSerializer createKafkaEventFactory(ObjectMapper objectMapper, EventHandlerChain eventHandlerChain) {
+    return new JsonSerializerWrapper(objectMapper, eventHandlerChain);
+  }
+
+  @Bean
+  @Autowired
+  public EventHandlerChain createEventHandlerChain(InMemoryOrderRepository orderRepo) {
+    final EventHandlerChain chain = new EventHandlerChain();
+
+    chain.addEventHandler(new OrderEventHandler(orderRepo));
+
+    return chain;
+  }
+
+  @Bean
+  @Autowired
+  public EventProcessor createAndStartEventProcessor(EventSource eventSource, EventHandlerChain handlerChain, EventWrapper eventWrapper) {
+    final EventProcessor eventProcessor = new EventProcessor(eventSource, handlerChain, eventWrapper);
+
+    new Thread(eventProcessor, "Event processor").start();
+
+    return eventProcessor;
   }
 }

@@ -12,6 +12,7 @@ public interface EventSink {
    * Publishes an event.
    * 
    * @param evt The event to publish - must not be {@code null}
+   * @return Whether the event was published successfully
    */
-  public void publish(Event evt);
+  public boolean publish(Event evt);
 }

@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 
 import achwie.shop.event.api.Event;
 import achwie.shop.event.api.EventSink;
+import achwie.shop.event.impl.EventWrapper;
 import achwie.shop.order.Order;
-import achwie.shop.order.event.EventFactory;
 
 /**
  * 
@@ -16,12 +16,12 @@ import achwie.shop.order.event.EventFactory;
 @Component
 public class OrderWriteService {
   private final EventSink eventSink;
-  private final EventFactory eventFactory;
+  private final EventWrapper eventWrapper;
 
   @Autowired
-  public OrderWriteService(EventSink eventSink, EventFactory eventFactory) {
+  public OrderWriteService(EventSink eventSink, EventWrapper eventWrapper) {
     this.eventSink = eventSink;
-    this.eventFactory = eventFactory;
+    this.eventWrapper = eventWrapper;
   }
 
   /**
@@ -34,7 +34,7 @@ public class OrderWriteService {
    */
   public void placeOrder(Order order) {
     // TODO: Use a proper event type like "PostedOrder"
-    final Event evt = eventFactory.createOrderEvent(order);
+    final Event evt = eventWrapper.wrap(order);
 
     eventSink.publish(evt);
   }
