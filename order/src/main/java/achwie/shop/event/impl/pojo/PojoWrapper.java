@@ -30,7 +30,7 @@ public class PojoWrapper implements EventWrapper {
       throw new IllegalStateException("Couldn't find version for type " + payload.getClass());
     }
 
-    final PojoEventHeader header = new PojoEventHeader(eventVersion.getVersionCode(), eventVersion.getTypeCode());
+    final PojoEventHeader header = new PojoEventHeader(eventVersion.getTypeCode(), eventVersion.getVersionCode());
     final PojoEvent event = new PojoEvent(header, payload);
 
     return event;

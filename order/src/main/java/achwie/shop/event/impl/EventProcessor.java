@@ -68,7 +68,11 @@ public class EventProcessor implements Runnable {
       if (handler != null) {
         T payload = eventWrapper.unwrap(evt, eventType);
         handler.onEvent(payload);
+      } else {
+        System.err.println(String.format("Couldn't find handler for event type %s!", eventType));
       }
+    } else {
+      System.err.println(String.format("Couldn't find Java type for event (typeCode: %d, versionCode: %d)!", typeCode, versionCode));
     }
   }
 }

@@ -1,4 +1,4 @@
-package achwie.shop.order;
+package achwie.shop.order.write;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

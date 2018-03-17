@@ -41,4 +41,9 @@ public class PojoEventHeader implements EventHeader {
   public int getTypeCode() {
     return typeCode;
   }
+  
+  @Override
+  public String toString() {
+    return String.format("EventHeader[versionCode: %d, typeCode: %s]", versionCode, typeCode);
+  }
 }

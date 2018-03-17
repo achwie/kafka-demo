@@ -1,5 +1,7 @@
 package achwie.shop.order.write;
 
+import java.time.ZonedDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,10 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import achwie.shop.order.AuthService;
-import achwie.shop.order.Cart;
-import achwie.shop.order.CartItem;
-import achwie.shop.order.Order;
-import achwie.shop.order.OrderItem;
+import achwie.shop.order.event.OrderPostedByCustomer;
 
 /**
  * 
@@ -23,12 +22,12 @@ import achwie.shop.order.OrderItem;
 @RequestMapping("/orders")
 public class OrderWriteController {
   private static final ResponseEntity<String> RESPONSE_SUCCESS = new ResponseEntity<String>("OK", HttpStatus.OK);
-  private final OrderWriteService orderWriteService;
+  private final OrderEventPublisher orderEventPublisher;
   private final AuthService authService;
 
   @Autowired
-  public OrderWriteController(OrderWriteService orderWriteService, AuthService authService) {
-    this.orderWriteService = orderWriteService;
+  public OrderWriteController(OrderEventPublisher orderWriteService, AuthService authService) {
+    this.orderEventPublisher = orderWriteService;
     this.authService = authService;
   }
 
@@ -42,23 +41,25 @@ public class OrderWriteController {
     if (cart == null || cart.isEmpty())
       return new ResponseEntity<String>("ERROR: Can't send an empty order!.", HttpStatus.BAD_REQUEST);
 
-    final Order order = createOrderFromCart(sessionUserId, cart);
+    final OrderPostedByCustomer orderPostedEvent = createOrderPostedByCustomerEvent(sessionUserId, cart);
 
-    orderWriteService.placeOrder(order);
+    orderEventPublisher.publish(orderPostedEvent);
 
     return RESPONSE_SUCCESS;
   }
 
-  private Order createOrderFromCart(String userId, Cart cart) {
-    final Order order = new Order(userId);
+  private OrderPostedByCustomer createOrderPostedByCustomerEvent(String userId, Cart cart) {
+    final int itemCount = cart.getItems().size();
+    final ZonedDateTime orderTime = ZonedDateTime.now();
+    final String[] productIds = new String[itemCount];
+    final int[] quantities = new int[itemCount];
 
-    for (CartItem cartItem : cart.getItems())
-      order.addOrderItem(createOrderItemFromCartItem(cartItem));
+    for (int i = 0; i < itemCount; i++) {
+      final CartItem item = cart.getItems().get(i);
+      productIds[i] = item.getProductId();
+      quantities[i] = item.getQuantity();
+    }
 
-    return order;
-  }
-
-  private OrderItem createOrderItemFromCartItem(CartItem cartItem) {
-    return new OrderItem(cartItem.getProductId(), cartItem.getProductName(), cartItem.getQuantity());
+    return new OrderPostedByCustomer(userId, orderTime, productIds, quantities);
   }
 }

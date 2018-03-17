@@ -2,6 +2,7 @@ package achwie.shop.order.read;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import achwie.shop.order.AuthService;
-import achwie.shop.order.Order;
+import achwie.shop.order.store.read.Order;
+import achwie.shop.order.store.read.OrderItem;
 
 /**
  * 
@@ -31,16 +33,29 @@ public class OrderReadController {
   }
 
   @RequestMapping(value = "/{sessionId}", method = RequestMethod.GET)
-  public ResponseEntity<List<Order>> viewOrders(@PathVariable String sessionId) {
+  public ResponseEntity<List<OrderDto>> viewOrders(@PathVariable String sessionId) {
     final String sessionUserId = authService.getUserIdForSession(sessionId);
 
-    final List<Order> orders;
+    final List<OrderDto> orders;
     if (sessionUserId != null) {
-      orders = orderReadService.getOrdersForUser(sessionUserId);
+      orders = map(orderReadService.getOrdersForUser(sessionUserId));
     } else {
       orders = Collections.emptyList();
     }
 
-    return new ResponseEntity<List<Order>>(orders, HttpStatus.OK);
+    return new ResponseEntity<List<OrderDto>>(orders, HttpStatus.OK);
+  }
+
+  private List<OrderDto> map(List<Order> orders) {
+    return orders.stream().map(this::map).collect(Collectors.toList());
+  }
+
+  private OrderDto map(Order order) {
+
+    final OrderDto orderDto = new OrderDto(order.getId());
+    for (OrderItem item : order.getItems())
+      orderDto.addOrderItem(new OrderItemDto(item.getProductId(), item.getProductName(), item.getQuantity()));
+
+    return orderDto;
   }
 }

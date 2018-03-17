@@ -5,7 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import achwie.shop.order.Order;
+import achwie.shop.order.store.read.Order;
+import achwie.shop.order.store.read.OrderReadRepository;
 
 /**
  * 
@@ -14,10 +15,10 @@ import achwie.shop.order.Order;
  */
 @Component
 public class OrderReadService {
-  private final InMemoryOrderRepository orderRepo;
+  private final OrderReadRepository orderRepo;
 
   @Autowired
-  public OrderReadService(InMemoryOrderRepository orderRepo) {
+  public OrderReadService(OrderReadRepository orderRepo) {
     this.orderRepo = orderRepo;
   }
 

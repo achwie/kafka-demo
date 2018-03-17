@@ -1,4 +1,4 @@
-package achwie.shop.order;
+package achwie.shop.order.read;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,22 +13,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author 20.11.2015, Achim Wiedemann
  */
 // TODO: Add shipping address
-public class Order {
+public class OrderDto {
   private final String userId;
-  private final List<OrderItem> orderItems = new ArrayList<>();
+  private final List<OrderItemDto> orderItems = new ArrayList<>();
   private final Calendar orderDate = Calendar.getInstance();
 
-  // TODO: Don't want serialization info in my domain classes
   @JsonCreator
-  public Order(@JsonProperty("userId") String userId) {
+  public OrderDto(@JsonProperty("userId") String userId) {
     this.userId = userId;
   }
 
-  public void addOrderItem(OrderItem item) {
+  public void addOrderItem(OrderItemDto item) {
     orderItems.add(item);
   }
 
-  public List<OrderItem> getOrderItems() {
+  public List<OrderItemDto> getOrderItems() {
     return Collections.unmodifiableList(orderItems);
   }
 

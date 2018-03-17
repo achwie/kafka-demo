@@ -12,8 +12,6 @@ import achwie.shop.event.impl.EventProcessor;
 import achwie.shop.event.impl.EventWrapper;
 import achwie.shop.event.impl.local.LocalEventSink;
 import achwie.shop.event.impl.local.LocalEventSource;
-import achwie.shop.order.eventhandler.OrderEventHandler;
-import achwie.shop.order.read.InMemoryOrderRepository;
 
 /**
  * Starts the order service using the local (in-memory) event transport.
@@ -41,12 +39,8 @@ public class OrderStarterLocal {
 
   @Bean
   @Autowired
-  public EventHandlerChain createEventHandlerChain(InMemoryOrderRepository orderRepo) {
-    final EventHandlerChain chain = new EventHandlerChain();
-
-    chain.addEventHandler(new OrderEventHandler(orderRepo));
-
-    return chain;
+  public EventHandlerChain createEventHandlerChain() {
+    return new EventHandlerChain();
   }
 
   @Bean

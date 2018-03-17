@@ -24,8 +24,6 @@ import achwie.shop.event.impl.EventWrapper;
 import achwie.shop.event.impl.json.JsonSerializerWrapper;
 import achwie.shop.event.impl.kafka.KafkaEventSink;
 import achwie.shop.event.impl.kafka.KafkaEventSource;
-import achwie.shop.order.eventhandler.OrderEventHandler;
-import achwie.shop.order.read.InMemoryOrderRepository;
 
 /**
  * Starts the order service with Apache Kafka as the event transport.
@@ -83,12 +81,8 @@ public class OrderStarterKafka {
 
   @Bean
   @Autowired
-  public EventHandlerChain createEventHandlerChain(InMemoryOrderRepository orderRepo) {
-    final EventHandlerChain chain = new EventHandlerChain();
-
-    chain.addEventHandler(new OrderEventHandler(orderRepo));
-
-    return chain;
+  public EventHandlerChain createEventHandlerChain() {
+    return new EventHandlerChain();
   }
 
   @Bean

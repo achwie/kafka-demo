@@ -40,7 +40,7 @@ public class JsonSerializerWrapper implements EventSerializer, EventWrapper {
       throw new IllegalStateException("Couldn't find version for type " + payload.getClass());
     }
 
-    final JsonEventHeader header = new JsonEventHeader(eventVersion.getVersionCode(), eventVersion.getTypeCode());
+    final JsonEventHeader header = new JsonEventHeader(eventVersion.getTypeCode(), eventVersion.getVersionCode());
     final JsonEvent event = new JsonEvent(header, payload);
 
     return event;

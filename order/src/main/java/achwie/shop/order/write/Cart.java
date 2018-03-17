@@ -1,4 +1,4 @@
-package achwie.shop.order;
+package achwie.shop.order.write;
 
 import java.util.Collections;
 import java.util.List;
