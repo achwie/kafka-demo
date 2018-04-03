@@ -97,8 +97,8 @@ public class JsonSerializerWrapper implements EventSerializer, EventWrapper {
             throw new SerializationException(msg);
           }
         } catch (JsonProcessingException e) {
-          final String msg = String.format("Couldn't deserialize event payload (event-type: %d, event-version: %d)! Discarding event!", header.getTypeCode(),
-              header.getVersionCode());
+          final String msg = String.format("Couldn't deserialize event payload (event-type: %d, event-version: %d, error: %s)!", header.getTypeCode(),
+              header.getVersionCode(), e.getMessage());
           throw new SerializationException(msg);
         }
       } catch (JsonProcessingException e) {

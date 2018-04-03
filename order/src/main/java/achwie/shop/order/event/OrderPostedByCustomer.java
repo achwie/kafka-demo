@@ -2,6 +2,9 @@ package achwie.shop.order.event;
 
 import java.time.ZonedDateTime;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * An order posted by the customer.
  * 
@@ -14,7 +17,12 @@ public class OrderPostedByCustomer implements DomainEvent {
   private final String[] productIds;
   private final int[] quantities;
 
-  public OrderPostedByCustomer(String userId, ZonedDateTime orderDate, String[] productIds, int[] quantities) {
+  @JsonCreator
+  public OrderPostedByCustomer(
+      @JsonProperty("userId") String userId,
+      @JsonProperty("orderDate") ZonedDateTime orderDate,
+      @JsonProperty("productIds") String[] productIds,
+      @JsonProperty("quantities") int[] quantities) {
     this.userId = userId;
     this.orderDate = orderDate;
     this.productIds = productIds;

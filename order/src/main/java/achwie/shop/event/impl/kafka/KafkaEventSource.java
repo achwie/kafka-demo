@@ -75,7 +75,7 @@ public class KafkaEventSource implements EventSource {
                 eventBuffer.put(event);
 
             } catch (SerializationException e) {
-              System.err.println("Could not deserialize event payload! Disregarding event!");
+              System.err.println("Could not deserialize event payload! Disregarding event! Reason: " + e.getMessage());
             } catch (InterruptedException e) {
               System.err.println(
                   "Waiting to put element into full event buffer has been interrupted! Shutting down Kafka poller thread... (details: " + e.getMessage()

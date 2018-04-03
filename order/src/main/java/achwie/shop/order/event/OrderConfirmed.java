@@ -1,5 +1,8 @@
 package achwie.shop.order.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * 
  * @author 17.03.2018, Achim Wiedemann
@@ -8,7 +11,8 @@ package achwie.shop.order.event;
 public class OrderConfirmed implements DomainEvent {
   private final String orderId;
 
-  public OrderConfirmed(String orderId) {
+  @JsonCreator
+  public OrderConfirmed(@JsonProperty("orderId") String orderId) {
     this.orderId = orderId;
   }
 
