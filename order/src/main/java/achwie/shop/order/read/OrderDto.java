@@ -1,8 +1,6 @@
 package achwie.shop.order.read;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -14,30 +12,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 // TODO: Add shipping address
 public class OrderDto {
+  private final String id;
   private final String userId;
-  private final List<OrderItemDto> orderItems = new ArrayList<>();
-  private final Calendar orderDate = Calendar.getInstance();
+  private final List<OrderItemDto> orderItems;
+  private final ZonedDateTime orderTime;
 
   @JsonCreator
-  public OrderDto(@JsonProperty("userId") String userId) {
+  public OrderDto(@JsonProperty("id") String id, @JsonProperty("userId") String userId, @JsonProperty("orderTime") ZonedDateTime orderTime,
+      @JsonProperty("orderItems") List<OrderItemDto> orderItems) {
+    this.id = id;
     this.userId = userId;
+    this.orderTime = orderTime;
+    this.orderItems = orderItems;
   }
 
-  public void addOrderItem(OrderItemDto item) {
-    orderItems.add(item);
+  public String getId() {
+    return id;
   }
 
   public List<OrderItemDto> getOrderItems() {
-    return Collections.unmodifiableList(orderItems);
+    return orderItems;
   }
 
-  public Calendar getOrderDate() {
-    final Calendar copy = Calendar.getInstance();
-
-    copy.setTimeInMillis(orderDate.getTimeInMillis());
-    copy.setTimeZone(orderDate.getTimeZone());
-
-    return copy;
+  public ZonedDateTime getOrderTime() {
+    return orderTime;
   }
 
   public String getUserId() {

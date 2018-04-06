@@ -1,4 +1,4 @@
-package achwie.shop.order.store.write;
+package achwie.shop.order.write.domain;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -7,19 +7,17 @@ import java.util.List;
 import java.util.Objects;
 
 import achwie.shop.eventstore.DomainEvent;
-import achwie.shop.order.event.OrderConfirmed;
-import achwie.shop.order.event.OrderPayed;
-import achwie.shop.order.event.OrderPostedByCustomer;
-import achwie.shop.order.event.OrderShipped;
-import achwie.shop.order.store.read.Order;
-import achwie.shop.order.store.read.OrderItem;
+import achwie.shop.order.write.event.OrderConfirmed;
+import achwie.shop.order.write.event.OrderPayed;
+import achwie.shop.order.write.event.OrderPostedByCustomer;
+import achwie.shop.order.write.event.OrderShipped;
 
 /**
  * 
  * @author 17.03.2018, Achim Wiedemann
  *
  */
-public class MutableOrder implements Order {
+public class MutableOrder {
   private String id;
   private OrderStatus status;
   private String userId;
@@ -35,28 +33,23 @@ public class MutableOrder implements Order {
       apply(evt);
   }
 
-  @Override
   public String getId() {
     return id;
   }
 
-  @Override
   public OrderStatus getStatus() {
     return status;
   }
 
-  @Override
   public String getUserId() {
     return userId;
   }
 
-  @Override
   public ZonedDateTime getOrderTime() {
     return orderTime;
   }
 
-  @Override
-  public List<OrderItem> getItems() {
+  public List<MutableOrderItem> getItems() {
     return Collections.unmodifiableList(items);
   }
 

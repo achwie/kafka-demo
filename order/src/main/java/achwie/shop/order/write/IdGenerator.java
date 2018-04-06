@@ -1,4 +1,4 @@
-package achwie.shop.order.store.write;
+package achwie.shop.order.write;
 
 import org.springframework.stereotype.Component;
 

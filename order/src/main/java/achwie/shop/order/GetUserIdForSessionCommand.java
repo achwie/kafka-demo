@@ -5,9 +5,6 @@ import org.springframework.web.client.RestOperations;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import achwie.shop.CommandGroup;
-import achwie.shop.HystrixRestCommand;
-
 /**
  * 
  * @author 01.02.2016, Achim Wiedemann

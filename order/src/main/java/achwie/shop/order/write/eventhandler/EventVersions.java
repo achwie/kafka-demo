@@ -1,14 +1,14 @@
-package achwie.shop.order.eventhandler;
+package achwie.shop.order.write.eventhandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import achwie.shop.event.impl.EventVersion;
-import achwie.shop.order.event.OrderConfirmed;
-import achwie.shop.order.event.OrderPayed;
-import achwie.shop.order.event.OrderPostedByCustomer;
-import achwie.shop.order.event.OrderShipped;
+import achwie.shop.order.write.event.OrderConfirmed;
+import achwie.shop.order.write.event.OrderPayed;
+import achwie.shop.order.write.event.OrderPostedByCustomer;
+import achwie.shop.order.write.event.OrderShipped;
 
 /**
  * Holds the versions for domain events.

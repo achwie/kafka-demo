@@ -1,17 +1,14 @@
-package achwie.shop.order.store.write;
-
-import achwie.shop.order.store.read.OrderItem;
-import achwie.shop.order.store.read.ProductDetails;
+package achwie.shop.order.write.domain;
 
 /**
  * 
  * @author 17.03.2018, Achim Wiedemann
  *
  */
-public class MutableOrderItem implements OrderItem {
+public class MutableOrderItem {
   private String productId;
   private int quantity;
-  private ProductDetails productDetails;
+  private MutableProductDetails productDetails;
 
   public MutableOrderItem(String productId, int quantity) {
     this.productId = productId;
@@ -38,7 +35,7 @@ public class MutableOrderItem implements OrderItem {
     return productDetails != null ? productDetails.getProductName() : null;
   }
 
-  public void setProductDetails(ProductDetails productDetails) {
+  public void setProductDetails(MutableProductDetails productDetails) {
     this.productDetails = productDetails;
   }
 }

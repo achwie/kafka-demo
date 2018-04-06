@@ -1,4 +1,4 @@
-package achwie.shop;
+package achwie.shop.order;
 
 import com.netflix.hystrix.HystrixCommandGroupKey;
 

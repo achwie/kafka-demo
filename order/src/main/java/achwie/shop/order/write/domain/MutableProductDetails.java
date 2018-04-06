@@ -1,13 +1,11 @@
-package achwie.shop.order.store.write;
-
-import achwie.shop.order.store.read.ProductDetails;
+package achwie.shop.order.write.domain;
 
 /**
  * 
  * @author 17.03.2018, Achim Wiedemann
  *
  */
-public class MutableProductDetails implements ProductDetails {
+public class MutableProductDetails {
   private String productName;
 
   public String getProductName() {

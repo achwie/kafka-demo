@@ -1,4 +1,4 @@
-package achwie.shop.order.eventhandler;
+package achwie.shop.order.write.eventhandler;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import achwie.shop.event.impl.EventHandlerChain;
 import achwie.shop.event.impl.EventVersion;
 import achwie.shop.eventstore.DomainEvent;
 import achwie.shop.eventstore.EventStore;
-import achwie.shop.order.event.OrderShipped;
-import achwie.shop.order.store.write.MutableOrder;
+import achwie.shop.order.write.domain.MutableOrder;
+import achwie.shop.order.write.event.OrderShipped;
 
 /**
  * 

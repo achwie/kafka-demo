@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
+import achwie.shop.event.api.Event;
+import achwie.shop.event.api.EventSink;
 import achwie.shop.event.api.EventSource;
 import achwie.shop.event.impl.EventHandlerChain;
 import achwie.shop.event.impl.EventProcessor;
@@ -13,7 +15,6 @@ import achwie.shop.eventstore.DomainEvent;
 import achwie.shop.eventstore.EventStore;
 import achwie.shop.eventstore.EventStoreListener;
 import achwie.shop.eventstore.inmemory.InMemoryEventStore;
-import achwie.shop.order.write.OrderEventPublisher;
 
 /**
  * 
@@ -23,19 +24,21 @@ import achwie.shop.order.write.OrderEventPublisher;
 public abstract class AbstractOrderStarter {
   @Bean
   @Autowired
-  public EventStore createEventStore(OrderEventPublisher orderEventPublisher) {
+  public EventStore createEventStore(EventSink eventSink, EventWrapper eventWrapper) {
     final InMemoryEventStore eventStore = new InMemoryEventStore();
 
     // Automatically publish all events after they got saved to the event store
     eventStore.addListener(new EventStoreListener() {
       @Override
-      public void onSave(List<DomainEvent> events) {
+      public void onSave(List<DomainEvent> domainEvents) {
       }
 
       @Override
-      public void onSaved(List<DomainEvent> events) {
-        for (DomainEvent event : events)
-          orderEventPublisher.publish(event);
+      public void onSaved(List<DomainEvent> domainEvents) {
+        for (DomainEvent domainEvent : domainEvents) {
+          final Event event = eventWrapper.wrap(domainEvent);
+          eventSink.publish(event);
+        }
       }
     });
 

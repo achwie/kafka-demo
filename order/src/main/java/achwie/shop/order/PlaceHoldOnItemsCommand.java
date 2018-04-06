@@ -4,9 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 
-import achwie.shop.CommandGroup;
-import achwie.shop.HystrixRestCommand;
-
 /**
  * 
  * @author 01.02.2016, Achim Wiedemann

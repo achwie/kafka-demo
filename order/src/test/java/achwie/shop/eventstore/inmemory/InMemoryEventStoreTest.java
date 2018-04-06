@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Test;
 
 import achwie.shop.eventstore.DomainEvent;
-import achwie.shop.order.event.OrderPayed;
+import achwie.shop.order.write.event.OrderPayed;
 
 /**
  * 

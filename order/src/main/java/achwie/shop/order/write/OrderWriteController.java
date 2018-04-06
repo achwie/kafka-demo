@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import achwie.shop.eventstore.EventStore;
 import achwie.shop.order.AuthService;
-import achwie.shop.order.event.OrderPostedByCustomer;
-import achwie.shop.order.store.write.IdGenerator;
-import achwie.shop.order.store.write.MutableOrder;
+import achwie.shop.order.write.domain.MutableOrder;
+import achwie.shop.order.write.event.OrderPostedByCustomer;
 
 /**
  * 
@@ -26,14 +25,12 @@ import achwie.shop.order.store.write.MutableOrder;
 public class OrderWriteController {
   private static final ResponseEntity<String> RESPONSE_SUCCESS = new ResponseEntity<String>("OK", HttpStatus.OK);
   private final EventStore eventStore;
-  private final OrderEventPublisher orderEventPublisher;
   private final IdGenerator idGenerator;
   private final AuthService authService;
 
   @Autowired
-  public OrderWriteController(EventStore eventStore, OrderEventPublisher orderWriteService, IdGenerator idGenerator, AuthService authService) {
+  public OrderWriteController(EventStore eventStore, IdGenerator idGenerator, AuthService authService) {
     this.eventStore = eventStore;
-    this.orderEventPublisher = orderWriteService;
     this.idGenerator = idGenerator;
     this.authService = authService;
   }
