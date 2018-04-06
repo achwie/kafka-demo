@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import achwie.shop.eventstore.EventStore;
 import achwie.shop.order.AuthService;
 import achwie.shop.order.event.OrderPostedByCustomer;
+import achwie.shop.order.store.write.IdGenerator;
+import achwie.shop.order.store.write.MutableOrder;
 
 /**
  * 
@@ -22,12 +25,16 @@ import achwie.shop.order.event.OrderPostedByCustomer;
 @RequestMapping("/orders")
 public class OrderWriteController {
   private static final ResponseEntity<String> RESPONSE_SUCCESS = new ResponseEntity<String>("OK", HttpStatus.OK);
+  private final EventStore eventStore;
   private final OrderEventPublisher orderEventPublisher;
+  private final IdGenerator idGenerator;
   private final AuthService authService;
 
   @Autowired
-  public OrderWriteController(OrderEventPublisher orderWriteService, AuthService authService) {
+  public OrderWriteController(EventStore eventStore, OrderEventPublisher orderWriteService, IdGenerator idGenerator, AuthService authService) {
+    this.eventStore = eventStore;
     this.orderEventPublisher = orderWriteService;
+    this.idGenerator = idGenerator;
     this.authService = authService;
   }
 
@@ -41,14 +48,12 @@ public class OrderWriteController {
     if (cart == null || cart.isEmpty())
       return new ResponseEntity<String>("ERROR: Can't send an empty order!.", HttpStatus.BAD_REQUEST);
 
-    final OrderPostedByCustomer orderPostedEvent = createOrderPostedByCustomerEvent(sessionUserId, cart);
-
-    orderEventPublisher.publish(orderPostedEvent);
+    postOrder(sessionUserId, cart);
 
     return RESPONSE_SUCCESS;
   }
 
-  private OrderPostedByCustomer createOrderPostedByCustomerEvent(String userId, Cart cart) {
+  private void postOrder(String userId, Cart cart) {
     final int itemCount = cart.getItems().size();
     final ZonedDateTime orderTime = ZonedDateTime.now();
     final String[] productIds = new String[itemCount];
@@ -60,6 +65,10 @@ public class OrderWriteController {
       quantities[i] = item.getQuantity();
     }
 
-    return new OrderPostedByCustomer(userId, orderTime, productIds, quantities);
+    final MutableOrder order = new MutableOrder();
+    final String newOrderId = idGenerator.nextOrderId();
+    final OrderPostedByCustomer orderPosted = order.postOrder(newOrderId, userId, orderTime, productIds, quantities);
+
+    eventStore.save(orderPosted.getAggregateId(), orderPosted);
   }
 }

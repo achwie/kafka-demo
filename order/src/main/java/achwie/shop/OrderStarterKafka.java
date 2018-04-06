@@ -18,9 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import achwie.shop.event.api.EventSink;
 import achwie.shop.event.api.EventSource;
 import achwie.shop.event.impl.EventHandlerChain;
-import achwie.shop.event.impl.EventProcessor;
 import achwie.shop.event.impl.EventSerializer;
-import achwie.shop.event.impl.EventWrapper;
 import achwie.shop.event.impl.json.JsonSerializerWrapper;
 import achwie.shop.event.impl.kafka.KafkaEventSink;
 import achwie.shop.event.impl.kafka.KafkaEventSource;
@@ -31,7 +29,7 @@ import achwie.shop.event.impl.kafka.KafkaEventSource;
  * @author 02.01.2016, Achim Wiedemann
  */
 @SpringBootApplication
-public class OrderStarterKafka {
+public class OrderStarterKafka extends AbstractOrderStarter {
   private static final String BOOTSTRAP_SERVERS = "192.168.56.2:9092,192.168.56.2:9093,192.168.56.2:9094";
 
   public static void main(String[] args) throws Exception {
@@ -77,21 +75,5 @@ public class OrderStarterKafka {
   @Autowired
   public JsonSerializerWrapper createEventSerializer(ObjectMapper objectMapper, EventHandlerChain eventHandlerChain) {
     return new JsonSerializerWrapper(objectMapper, eventHandlerChain);
-  }
-
-  @Bean
-  @Autowired
-  public EventHandlerChain createEventHandlerChain() {
-    return new EventHandlerChain();
-  }
-
-  @Bean
-  @Autowired
-  public EventProcessor createAndStartEventProcessor(EventSource eventSource, EventHandlerChain handlerChain, EventWrapper eventWrapper) {
-    final EventProcessor eventProcessor = new EventProcessor(eventSource, handlerChain, eventWrapper);
-
-    new Thread(eventProcessor, "Event processor").start();
-
-    return eventProcessor;
   }
 }

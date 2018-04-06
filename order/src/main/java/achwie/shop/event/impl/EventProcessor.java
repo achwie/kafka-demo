@@ -1,5 +1,7 @@
 package achwie.shop.event.impl;
 
+import java.util.List;
+
 import achwie.shop.event.api.Event;
 import achwie.shop.event.api.EventHeader;
 import achwie.shop.event.api.EventSource;
@@ -63,16 +65,21 @@ public class EventProcessor implements Runnable {
     final Class<T> eventType = (Class<T>) handlerChain.getEventTypeFor(typeCode, versionCode);
 
     if (eventType != null) {
-      final EventHandler<T> handler = handlerChain.findEventHandlerFor(eventType);
+      final List<EventHandler<T>> handlers = handlerChain.findEventHandlersFor(eventType);
 
-      if (handler != null) {
+      if (handlers != null) {
         T payload = eventWrapper.unwrap(evt, eventType);
-        handler.onEvent(payload);
+        notifyHandlers(handlers, payload);
       } else {
         System.err.println(String.format("Couldn't find handler for event type %s!", eventType));
       }
     } else {
       System.err.println(String.format("Couldn't find Java type for event (typeCode: %d, versionCode: %d)!", typeCode, versionCode));
     }
+  }
+
+  private <T> void notifyHandlers(List<EventHandler<T>> handlers, T payload) {
+    for (EventHandler<T> h : handlers)
+      h.onEvent(payload);
   }
 }

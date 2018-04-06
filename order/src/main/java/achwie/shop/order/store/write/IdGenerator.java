@@ -1,4 +1,4 @@
-package achwie.shop.order.store.impl.inmemory;
+package achwie.shop.order.store.write;
 
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class IdGenerator {
   private int currentId = 1;
 
-  public synchronized String nextId() {
-    return Integer.toString(currentId++);
+  public synchronized String nextOrderId() {
+    return "shop://order/" + Integer.toString(currentId++);
   }
 }

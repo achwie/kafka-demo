@@ -1,4 +1,4 @@
-package achwie.shop.order.event;
+package achwie.shop.eventstore;
 
 /**
  * Just in case we'd need some interface for all domain events
@@ -7,5 +7,6 @@ package achwie.shop.order.event;
  *
  */
 public interface DomainEvent {
+  public Object getAggregateId();
 
 }

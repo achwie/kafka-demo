@@ -1,5 +1,9 @@
 package achwie.shop.order.eventhandler;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import achwie.shop.event.impl.EventVersion;
 import achwie.shop.order.event.OrderConfirmed;
 import achwie.shop.order.event.OrderPayed;
@@ -12,7 +16,10 @@ import achwie.shop.order.event.OrderShipped;
  * @author 10.03.2018, Achim Wiedemann
  *
  */
+// TODO: Rename to OrderEventVersions to make it clearer that this is only for
+// order events
 public class EventVersions implements EventVersion {
+  private static final List<EventVersions> allVersions = new ArrayList<>();
   private static final int TYPE_ORDER_POSTED_BY_CUSTOMER = 1;
   private static final int TYPE_ORDER_REGISTERED = 2;
   private static final int TYPE_ORDER_PAYED = 3;
@@ -29,6 +36,12 @@ public class EventVersions implements EventVersion {
     this.typeCode = typeCode;
     this.versionCode = versionCode;
     this.eventType = clazz;
+
+    allVersions.add(this);
+  }
+
+  public static List<EventVersions> allVersions() {
+    return Collections.unmodifiableList(allVersions);
   }
 
   public int getTypeCode() {

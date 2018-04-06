@@ -3,6 +3,7 @@ package achwie.shop.event.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Holds a list of {@link EventHandler event handlers} for processing events and
@@ -11,6 +12,7 @@ import java.util.Objects;
  * @author 09.03.2018, Achim Wiedemann
  *
  */
+// TODO: The EventTypeMapper part of this class is total crap
 public class EventHandlerChain implements EventTypeMapper {
   private final List<EventHandler<?>> handlers = new ArrayList<>();
 
@@ -38,20 +40,19 @@ public class EventHandlerChain implements EventTypeMapper {
   }
 
   /**
-   * Looks up an event handler in the chain that can process the given event
+   * Looks up the event handlers in the chain that can process the given event
    * type.
    * 
-   * @param eventType The event type to look up the handler for
-   * @return The first event handler that can handle the given event type or
-   *         {@code null} if none was found
+   * @param eventType The event type to look up the handlers for
+   * @return The event handlers that can handle the given event type or an empty
+   *         list if none was found
    */
   @SuppressWarnings("unchecked")
-  public <T> EventHandler<T> findEventHandlerFor(Class<T> eventType) {
-    for (EventHandler<?> handler : handlers)
-      if (handler.getProcessableEventVersion().getEventType().equals(eventType))
-        return (EventHandler<T>) handler;
-
-    return null;
+  public <T> List<EventHandler<T>> findEventHandlersFor(Class<T> eventType) {
+    return handlers.stream()
+        .filter(h -> h.getProcessableEventVersion().getEventType().equals(eventType))
+        .map(h -> (EventHandler<T>) h)
+        .collect(Collectors.toList());
   }
 
   /**
@@ -82,9 +83,11 @@ public class EventHandlerChain implements EventTypeMapper {
    * @param eventType The event type to look up the event version for
    * @return The first matching event version or {@code null} if not found.
    */
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
-  public EventVersion getEventVersionFor(Class<?> eventType) {
-    final EventHandler<?> handler = findEventHandlerFor(eventType);
-    return (handler != null) ? handler.getProcessableEventVersion() : null;
+  public EventVersion getEventVersionFor(Class eventType) {
+    final List<EventHandler> handlersForType = findEventHandlersFor(eventType);
+
+    return !handlersForType.isEmpty() ? handlersForType.get(0).getProcessableEventVersion() : null;
   }
 }

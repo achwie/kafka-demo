@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import achwie.shop.event.api.Event;
 import achwie.shop.event.api.EventSink;
 import achwie.shop.event.impl.EventWrapper;
-import achwie.shop.order.event.DomainEvent;
+import achwie.shop.eventstore.DomainEvent;
 
 /**
  * 

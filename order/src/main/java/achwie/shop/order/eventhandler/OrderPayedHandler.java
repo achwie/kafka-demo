@@ -1,14 +1,19 @@
 package achwie.shop.order.eventhandler;
 
+import java.time.ZonedDateTime;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import achwie.shop.event.impl.EventHandler;
 import achwie.shop.event.impl.EventHandlerChain;
 import achwie.shop.event.impl.EventVersion;
+import achwie.shop.eventstore.DomainEvent;
+import achwie.shop.eventstore.EventStore;
 import achwie.shop.order.event.OrderPayed;
 import achwie.shop.order.event.OrderShipped;
-import achwie.shop.order.write.OrderEventPublisher;
+import achwie.shop.order.store.write.MutableOrder;
 
 /**
  * 
@@ -17,25 +22,28 @@ import achwie.shop.order.write.OrderEventPublisher;
  */
 @Component
 public class OrderPayedHandler implements EventHandler<OrderPayed> {
-  private final OrderEventPublisher orderEventPublisher;
+  private final EventStore eventStore;
 
   @Autowired
-  public OrderPayedHandler(EventHandlerChain handlerChain, OrderEventPublisher orderEventPublisher) {
-    this.orderEventPublisher = orderEventPublisher;
+  public OrderPayedHandler(EventHandlerChain handlerChain, EventStore eventStore) {
+    this.eventStore = eventStore;
 
     handlerChain.addEventHandler(this);
   }
 
   @Override
   public void onEvent(OrderPayed event) {
-    final String orderId = event.getOrderId();
+    final List<DomainEvent> orderHistory = eventStore.load(event.getAggregateId());
+    final MutableOrder order = new MutableOrder(orderHistory);
 
-    // TODO: Handle shipment
-    System.out.println("Order shipped " + orderId);
+    // TODO: Handle shipment (wait for external signal from order fulfillment
+    // that order has been dispatched)
+    System.out.println("Order shipped " + order.getId());
+    final ZonedDateTime shippedTime = ZonedDateTime.now();
 
-    final OrderShipped orderShipped = new OrderShipped(orderId);
+    final OrderShipped orderShipped = order.shipOrder(shippedTime);
 
-    orderEventPublisher.publish(orderShipped);
+    eventStore.save(orderShipped.getAggregateId(), orderShipped);
   }
 
   @Override

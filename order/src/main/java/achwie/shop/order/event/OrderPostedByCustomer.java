@@ -5,6 +5,8 @@ import java.time.ZonedDateTime;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import achwie.shop.eventstore.DomainEvent;
+
 /**
  * An order posted by the customer.
  * 
@@ -12,29 +14,40 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class OrderPostedByCustomer implements DomainEvent {
+  private final String orderId;
   private final String userId;
-  private final ZonedDateTime orderDate;
+  private final ZonedDateTime orderTime;
   private final String[] productIds;
   private final int[] quantities;
 
   @JsonCreator
   public OrderPostedByCustomer(
+      @JsonProperty("orderId") String orderId,
       @JsonProperty("userId") String userId,
-      @JsonProperty("orderDate") ZonedDateTime orderDate,
+      @JsonProperty("orderTime") ZonedDateTime orderTime,
       @JsonProperty("productIds") String[] productIds,
       @JsonProperty("quantities") int[] quantities) {
+    this.orderId = orderId;
     this.userId = userId;
-    this.orderDate = orderDate;
-    this.productIds = productIds;
-    this.quantities = quantities;
+    this.orderTime = orderTime;
+    this.productIds = (productIds != null) ? productIds : new String[0];
+    this.quantities = (quantities != null) ? quantities : new int[0];
+  }
+
+  public Object getAggregateId() {
+    return orderId;
+  }
+
+  public String getOrderId() {
+    return orderId;
   }
 
   public String getUserId() {
     return userId;
   }
 
-  public ZonedDateTime getOrderDate() {
-    return orderDate;
+  public ZonedDateTime getOrderTime() {
+    return orderTime;
   }
 
   public String[] getProductIds() {
@@ -43,5 +56,12 @@ public class OrderPostedByCustomer implements DomainEvent {
 
   public int[] getQuantities() {
     return quantities;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("%s[orderId: %s, usedId: %s, orderTime: %s, productIds: [length:%d], quantities [length:%d]]", getClass().getSimpleName(), orderId,
+        userId,
+        orderTime, productIds.length, quantities.length);
   }
 }

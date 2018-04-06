@@ -1,14 +1,19 @@
 package achwie.shop.order.eventhandler;
 
+import java.time.ZonedDateTime;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import achwie.shop.event.impl.EventHandler;
 import achwie.shop.event.impl.EventHandlerChain;
 import achwie.shop.event.impl.EventVersion;
+import achwie.shop.eventstore.DomainEvent;
+import achwie.shop.eventstore.EventStore;
 import achwie.shop.order.event.OrderConfirmed;
 import achwie.shop.order.event.OrderPayed;
-import achwie.shop.order.write.OrderEventPublisher;
+import achwie.shop.order.store.write.MutableOrder;
 
 /**
  * 
@@ -17,27 +22,32 @@ import achwie.shop.order.write.OrderEventPublisher;
  */
 @Component
 public class OrderConfirmedHandler implements EventHandler<OrderConfirmed> {
-  private final OrderEventPublisher orderEventPublisher;
+  private final EventStore eventStore;
 
   @Autowired
-  public OrderConfirmedHandler(EventHandlerChain handlerChain, OrderEventPublisher orderEventPublisher) {
-    this.orderEventPublisher = orderEventPublisher;
+  public OrderConfirmedHandler(EventHandlerChain handlerChain, EventStore eventStore) {
+    this.eventStore = eventStore;
 
     handlerChain.addEventHandler(this);
   }
 
   @Override
   public void onEvent(OrderConfirmed event) {
-    final String orderId = event.getOrderId();
+    final List<DomainEvent> orderHistory = eventStore.load(event.getAggregateId());
+    final MutableOrder order = new MutableOrder(orderHistory);
 
+    // TODO: Load payment data for customer
+    System.out.println("Loaded payment data for customer " + order.getUserId());
     // TODO: Handle payment
-    System.out.println("Handled payment for order " + orderId);
-    // TODO: Notify fulfillment to ship order
-    System.out.println("Handled payment for order " + orderId);
+    System.out.println("Handled payment for order " + order.getId());
+    // TODO: Notify fulfillment to ship order (but: wouldn't fulfillment just
+    // also listen for an OrderPayed event?)
+    System.out.println("Handled payment for order " + order.getId());
+    final ZonedDateTime payedTime = ZonedDateTime.now();
 
-    final OrderPayed orderPayed = new OrderPayed(orderId);
+    final OrderPayed orderPayed = order.payOrder(payedTime);
 
-    orderEventPublisher.publish(orderPayed);
+    eventStore.save(orderPayed.getAggregateId(), orderPayed);
   }
 
   @Override
