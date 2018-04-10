@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,7 @@ import achwie.shop.order.write.eventhandler.EventVersions;
  */
 @Component
 public class InMemoryOrderRepository implements OrderReadRepository {
+  private static final Logger LOG = LoggerFactory.getLogger(InMemoryOrderRepository.class);
   private final Object lock = new Object();
   private final Map<String, List<OrderDto>> orders = new HashMap<>();
   private final EventStore eventStore;
@@ -74,6 +77,8 @@ public class InMemoryOrderRepository implements OrderReadRepository {
 
       ordersForUser.add(order);
 
+      LOG.debug("Added order for user (userId: {}): {}", userId, order);
+
       // Sort on save (assume more reads than writes)
       Collections.sort(ordersForUser, new Comparator<OrderDto>() {
         @Override
@@ -92,6 +97,8 @@ public class InMemoryOrderRepository implements OrderReadRepository {
   private void onAggregateChanged(DomainEvent event) {
     if (event == null)
       return;
+
+    LOG.debug("Received event for aggregate: {}", event);
 
     // Really simple: load latest order and replace old version with it
     final List<DomainEvent> orderHistory = eventStore.load(event.getAggregateId());

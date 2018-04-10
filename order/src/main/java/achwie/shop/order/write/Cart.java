@@ -25,4 +25,9 @@ public class Cart {
   public boolean isEmpty() {
     return cartItems.isEmpty();
   }
+
+  @Override
+  public String toString() {
+    return String.format("%s[cartItems: %s]", getClass().getSimpleName(), cartItems);
+  }
 }

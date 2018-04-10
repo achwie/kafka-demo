@@ -2,6 +2,8 @@ package achwie.shop.order.write.eventhandler;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,7 @@ import achwie.shop.order.write.event.OrderShipped;
  */
 @Component
 public class OrderShippedHandler implements EventHandler<OrderShipped> {
+  private static final Logger LOG = LoggerFactory.getLogger(OrderShippedHandler.class);
   private final EventStore eventStore;
 
   @Autowired
@@ -35,9 +38,9 @@ public class OrderShippedHandler implements EventHandler<OrderShipped> {
     final MutableOrder order = new MutableOrder(orderHistory);
 
     // TODO: Set order status to "shipped"
-    System.out.println("Set status of order to SHIPPED for order " + order.getId());
+    LOG.info("TODO: Set status of order to SHIPPED for order {}", order.getId());
     // TODO: Notify customer via email
-    System.out.println("Customer notified of shipment for order " + order.getId());
+    LOG.info("TODO: Customer notified of shipment for order {}", order.getId());
   }
 
   @Override

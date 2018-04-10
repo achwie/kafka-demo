@@ -94,7 +94,7 @@ public class MutableOrder {
   public void apply(DomainEvent evt) {
     Objects.requireNonNull(evt, "Given domain event must not be null!");
 
-    Class<?> eventType = evt.getClass();
+    final Class<?> eventType = evt.getClass();
 
     if (eventType == OrderPostedByCustomer.class) {
       handleOrderPostedByCustomer((OrderPostedByCustomer) evt);
@@ -159,7 +159,7 @@ public class MutableOrder {
       throw new IllegalStateException(
           String.format("Can't mark different Order as payed! (orderId: %s, orderId in event: %s)", this.id, evt.getOrderId()));
 
-    // TODO: Do something with this information
+    this.status = OrderStatus.PAYED;
   }
 
   private void handleOrderShipped(OrderShipped evt) {

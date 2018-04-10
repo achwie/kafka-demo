@@ -3,6 +3,8 @@ package achwie.shop.order.write.eventhandler;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,7 @@ import achwie.shop.order.write.event.OrderPayed;
  */
 @Component
 public class OrderConfirmedHandler implements EventHandler<OrderConfirmed> {
+  private static final Logger LOG = LoggerFactory.getLogger(OrderConfirmedHandler.class);
   private final EventStore eventStore;
 
   @Autowired
@@ -37,12 +40,13 @@ public class OrderConfirmedHandler implements EventHandler<OrderConfirmed> {
     final MutableOrder order = new MutableOrder(orderHistory);
 
     // TODO: Load payment data for customer
-    System.out.println("Loaded payment data for customer " + order.getUserId());
+    LOG.info("TODO: Loaded payment data for customer {}", order.getUserId());
     // TODO: Handle payment
-    System.out.println("Handled payment for order " + order.getId());
+    LOG.info("TODO: Handled payment for order {}", order.getId());
     // TODO: Notify fulfillment to ship order (but: wouldn't fulfillment just
     // also listen for an OrderPayed event?)
-    System.out.println("Handled payment for order " + order.getId());
+    LOG.info("TODO: Notified fulfillment to ship order {}", order.getId());
+
     final ZonedDateTime payedTime = ZonedDateTime.now();
 
     final OrderPayed orderPayed = order.payOrder(payedTime);

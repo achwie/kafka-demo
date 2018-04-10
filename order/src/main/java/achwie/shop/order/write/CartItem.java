@@ -30,4 +30,9 @@ public class CartItem {
   public int getQuantity() {
     return quantity;
   }
+
+  @Override
+  public String toString() {
+    return String.format("%s[productId: %s, producctName: %s, quantity: %d]", getClass().getSimpleName(), productId, productName, quantity);
+  }
 }

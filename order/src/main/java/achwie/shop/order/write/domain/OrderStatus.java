@@ -12,12 +12,16 @@ public enum OrderStatus {
   REGISTERED,
   /**
    * The order is confirmed (i.e. availability of all items is confirmed,
-   * shipment address is available, and order has been payed for).
+   * shipment address is available).
    */
   CONFIRMED,
   /**
-   * The order has physically been shipped out and is now in transit to the
-   * customer.
+   * The confirmed order has been payed for.
+   */
+  PAYED,
+  /**
+   * The payed order has physically been shipped out and is now in transit to
+   * the customer.
    */
   SHIPPED;
 }

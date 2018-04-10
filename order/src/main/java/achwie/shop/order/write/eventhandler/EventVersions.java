@@ -57,6 +57,12 @@ public class EventVersions implements EventVersion {
   }
 
   @Override
+  public String toString() {
+    return String.format("%s[typeCode: %d, versionCode: %d, eventType: %s]", getClass().getSimpleName(), typeCode, versionCode,
+        eventType.getClass());
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;

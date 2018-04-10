@@ -66,7 +66,7 @@ public class MutableOrderTest {
     confirmOrder(order);
     payOrder(order);
 
-    // No status change for this action right now
+    assertEquals(OrderStatus.PAYED, order.getStatus());
   }
 
   @Test

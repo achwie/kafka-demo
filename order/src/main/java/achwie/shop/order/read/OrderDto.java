@@ -41,4 +41,9 @@ public class OrderDto {
   public String getUserId() {
     return userId;
   }
+
+  @Override
+  public String toString() {
+    return String.format("%s[id: %s, userId: %s, orderTime: %s, orderItems: %s]", getClass().getSimpleName(), id, userId, orderTime, orderItems);
+  }
 }

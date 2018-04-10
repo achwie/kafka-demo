@@ -3,6 +3,8 @@ package achwie.shop.order.write.eventhandler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,7 @@ import achwie.shop.order.write.event.OrderPostedByCustomer;
  */
 @Component
 public class OrderPostedByCustomerHandler implements EventHandler<OrderPostedByCustomer> {
+  private static final Logger LOG = LoggerFactory.getLogger(OrderPostedByCustomer.class);
   private final EventStore eventStore;
   private final StockService stockService;
   private final CatalogService catalogService;
@@ -43,7 +46,8 @@ public class OrderPostedByCustomerHandler implements EventHandler<OrderPostedByC
     final List<DomainEvent> orderHistory = eventStore.load(event.getAggregateId());
     final MutableOrder order = new MutableOrder(orderHistory);
 
-    System.out.println("Received order and saved it under id " + order.getId());
+    LOG.info("Received order under id {}", order.getId());
+
     // Place hold on products
     final boolean allProductsAvailable = stockService.putHoldOnAll(event.getProductIds(), event.getQuantities());
     if (allProductsAvailable) {
@@ -70,7 +74,8 @@ public class OrderPostedByCustomerHandler implements EventHandler<OrderPostedByC
       if (productDetails != null) {
         allProductDetails.add(productDetails);
       } else {
-        System.err.println(String.format("ERROR: Could not get product details for product with ID %s", productId));
+        // TODO: What to do (throw exception? add "special" product details?)
+        LOG.error("Could not get product details for product with ID {}", productId);
       }
     }
 

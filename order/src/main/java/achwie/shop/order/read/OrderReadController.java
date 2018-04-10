@@ -3,6 +3,8 @@ package achwie.shop.order.read;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import achwie.shop.order.AuthService;
 @RestController
 @RequestMapping("/orders")
 public class OrderReadController {
+  private static final Logger LOG = LoggerFactory.getLogger(OrderReadController.class);
   private final OrderReadRepository orderReadRepo;
   private final AuthService authService;
 
@@ -39,6 +42,8 @@ public class OrderReadController {
     } else {
       orders = Collections.emptyList();
     }
+
+    LOG.debug("Returning orders for user (user-id: {}): {}", sessionUserId, orders);
 
     return new ResponseEntity<List<OrderDto>>(orders, HttpStatus.OK);
   }

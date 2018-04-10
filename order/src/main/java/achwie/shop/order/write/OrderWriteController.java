@@ -2,6 +2,8 @@ package achwie.shop.order.write;
 
 import java.time.ZonedDateTime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ import achwie.shop.order.write.event.OrderPostedByCustomer;
 @RequestMapping("/orders")
 public class OrderWriteController {
   private static final ResponseEntity<String> RESPONSE_SUCCESS = new ResponseEntity<String>("OK", HttpStatus.OK);
+  private static final Logger LOG = LoggerFactory.getLogger(OrderWriteController.class);
   private final EventStore eventStore;
   private final IdGenerator idGenerator;
   private final AuthService authService;
@@ -51,6 +54,8 @@ public class OrderWriteController {
   }
 
   private void postOrder(String userId, Cart cart) {
+    LOG.info("Received order with cart {}", cart);
+
     final int itemCount = cart.getItems().size();
     final ZonedDateTime orderTime = ZonedDateTime.now();
     final String[] productIds = new String[itemCount];

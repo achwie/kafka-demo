@@ -3,6 +3,8 @@ package achwie.shop.order.write.eventhandler;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,7 @@ import achwie.shop.order.write.event.OrderShipped;
  */
 @Component
 public class OrderPayedHandler implements EventHandler<OrderPayed> {
+  private static final Logger LOG = LoggerFactory.getLogger(OrderPayedHandler.class);
   private final EventStore eventStore;
 
   @Autowired
@@ -38,7 +41,8 @@ public class OrderPayedHandler implements EventHandler<OrderPayed> {
 
     // TODO: Handle shipment (wait for external signal from order fulfillment
     // that order has been dispatched)
-    System.out.println("Order shipped " + order.getId());
+    LOG.info("TODO: Order shipped {}", order.getId());
+
     final ZonedDateTime shippedTime = ZonedDateTime.now();
 
     final OrderShipped orderShipped = order.shipOrder(shippedTime);

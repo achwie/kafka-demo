@@ -26,4 +26,9 @@ public class ProductDetails {
   public String getName() {
     return name;
   }
+
+  @Override
+  public String toString() {
+    return String.format("%s[id: %s, name: %s]", getClass().getSimpleName(), id, name);
+  }
 }
