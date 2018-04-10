@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 import achwie.shop.eventstore.DomainEvent;
+import achwie.shop.order.ProductDetails;
 import achwie.shop.order.write.event.OrderConfirmed;
 import achwie.shop.order.write.event.OrderPayed;
 import achwie.shop.order.write.event.OrderPostedByCustomer;
@@ -62,8 +63,8 @@ public class MutableOrder {
     return evt;
   }
 
-  public OrderConfirmed confirmOrder() {
-    final OrderConfirmed evt = new OrderConfirmed(this.id);
+  public OrderConfirmed confirmOrder(List<ProductDetails> productDetails) {
+    final OrderConfirmed evt = new OrderConfirmed(this.id, productDetails);
 
     apply(evt);
 
@@ -87,7 +88,7 @@ public class MutableOrder {
   }
 
   public String toString() {
-    return String.format("MutableOrder[id: %s, userId: %s, status: %s, orderTime: %s, items: %d]", id, userId, status, orderTime, items.size());
+    return String.format("MutableOrder[id: %s, userId: %s, status: %s, orderTime: %s, items: %s]", id, userId, status, orderTime, items);
   }
 
   public void apply(DomainEvent evt) {
@@ -128,6 +129,26 @@ public class MutableOrder {
           String.format("Can't confirm order for different Order! (orderId: %s, orderId in event: %s)", this.id, evt.getOrderId()));
 
     this.status = OrderStatus.CONFIRMED;
+    for (ProductDetails productDetails : evt.getProductDetails()) {
+      final MutableOrderItem orderItem = getItem(productDetails.getId());
+      if (orderItem != null) {
+        final MutableProductDetails mutableProductDetails = new MutableProductDetails();
+
+        mutableProductDetails.setProductName(productDetails.getName());
+
+        orderItem.setProductDetails(mutableProductDetails);
+      } else {
+        throw new IllegalArgumentException(String.format("ERROR: No history for product %s which was referenced in event!", productDetails.getId()));
+      }
+    }
+  }
+
+  private MutableOrderItem getItem(String productId) {
+    for (MutableOrderItem item : items)
+      if (item.getProductId().equals(productId))
+        return item;
+
+    return null;
   }
 
   private void handleOrderPayed(OrderPayed evt) {

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author 01.02.2016, Achim Wiedemann
  *
  */
-public class GetUserIdForSessionCommand extends HystrixRestCommand<String> {
+class GetUserIdForSessionCommand extends HystrixRestCommand<String> {
   private final String url;
 
   protected GetUserIdForSessionCommand(RestOperations restOps, String authServiceBaseUrl, String sessionId) {

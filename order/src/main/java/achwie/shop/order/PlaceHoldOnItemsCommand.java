@@ -10,8 +10,8 @@ import org.springframework.web.client.RestOperations;
  */
 class PlaceHoldOnItemsCommand extends HystrixRestCommand<Boolean> {
   private final String url;
-  private String[] productIds;
-  private int[] quantities;
+  private final String[] productIds;
+  private final int[] quantities;
 
   protected PlaceHoldOnItemsCommand(RestOperations restOps, String stockServiceBaseUrl, String[] productIds, int[] quantities) {
     super(CommandGroup.STOCK_PLACE_HOLD, restOps);

@@ -38,4 +38,9 @@ public class MutableOrderItem {
   public void setProductDetails(MutableProductDetails productDetails) {
     this.productDetails = productDetails;
   }
+
+  @Override
+  public String toString() {
+    return String.format("%s[productId: %s, quantity: %d, productName: %s]", getClass().getSimpleName(), productId, quantity, getProductName());
+  }
 }

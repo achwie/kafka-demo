@@ -1,8 +1,10 @@
 package achwie.shop.order;
 
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,13 +16,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Order {
   private final String userId;
   private final List<OrderItem> orderItems;
-  private final Calendar orderDate;
+  private final ZonedDateTime orderDate;
 
   @JsonCreator
-  Order(@JsonProperty("userId") String userId, @JsonProperty("orderItems") List<OrderItem> orderItems, @JsonProperty("orderDate") Calendar orderDate) {
+  Order(@JsonProperty("userId") String userId, @JsonProperty("orderItems") List<OrderItem> orderItems, @JsonProperty("orderTime") ZonedDateTime orderTime) {
     this.userId = userId;
     this.orderItems = (orderItems != null) ? orderItems : Collections.emptyList();
-    this.orderDate = orderDate;
+    this.orderDate = orderTime;
   }
 
   public void addOrderItem(OrderItem item) {
@@ -34,8 +36,8 @@ public class Order {
   public Calendar getOrderDate() {
     final Calendar copy = Calendar.getInstance();
 
-    copy.setTimeInMillis(orderDate.getTimeInMillis());
-    copy.setTimeZone(orderDate.getTimeZone());
+    copy.setTimeInMillis(orderDate.toInstant().toEpochMilli());
+    copy.setTimeZone(TimeZone.getTimeZone(orderDate.getZone().getId()));
 
     return copy;
   }
