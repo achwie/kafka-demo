@@ -43,11 +43,10 @@ public class OrderConfirmedHandler implements EventHandler<OrderConfirmed> {
     LOG.info("TODO: Loaded payment data for customer {}", order.getUserId());
     // TODO: Handle payment
     LOG.info("TODO: Handled payment for order {}", order.getId());
-    // TODO: Notify fulfillment to ship order (but: wouldn't fulfillment just
-    // also listen for an OrderPayed event?)
-    LOG.info("TODO: Notified fulfillment to ship order {}", order.getId());
 
     final ZonedDateTime payedTime = ZonedDateTime.now();
+
+    // TODO Handle payment with external service
 
     final OrderPayed orderPayed = order.payOrder(payedTime);
 

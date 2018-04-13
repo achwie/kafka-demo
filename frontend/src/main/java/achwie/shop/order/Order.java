@@ -17,12 +17,15 @@ public class Order {
   private final String userId;
   private final List<OrderItem> orderItems;
   private final ZonedDateTime orderDate;
+  private final String status;
 
   @JsonCreator
-  Order(@JsonProperty("userId") String userId, @JsonProperty("orderItems") List<OrderItem> orderItems, @JsonProperty("orderTime") ZonedDateTime orderTime) {
+  Order(@JsonProperty("userId") String userId, @JsonProperty("orderItems") List<OrderItem> orderItems, @JsonProperty("orderTime") ZonedDateTime orderTime,
+      @JsonProperty("status") String status) {
     this.userId = userId;
     this.orderItems = (orderItems != null) ? orderItems : Collections.emptyList();
     this.orderDate = orderTime;
+    this.status = status;
   }
 
   public void addOrderItem(OrderItem item) {
@@ -48,5 +51,9 @@ public class Order {
 
   public Object getUserId() {
     return userId;
+  }
+
+  public String getStatus() {
+    return status;
   }
 }

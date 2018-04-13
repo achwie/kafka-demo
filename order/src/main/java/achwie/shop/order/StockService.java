@@ -1,5 +1,7 @@
 package achwie.shop.order;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,12 +30,12 @@ public class StockService {
    * 
    * @param productIds The products to put a hold on.
    * @param quantities The quantities of the products to put a hold on.
-   * @return {@code true} if a hold could be placed on all products in the
-   *         requested quantities, {@code false} else.
+   * @return A list of product IDs on which <strong>no hold</strong> could be
+   *         placed.
    * @throws IllegalArgumentException If one of the arrays is {@code null} or
    *           they differ in length.
    */
-  public boolean putHoldOnAll(String[] productIds, int[] quantities) {
+  public List<String> putHoldOnAll(String[] productIds, int[] quantities) {
     return new PlaceHoldOnItemsCommand(restTemplate, stockServiceBaseUrl, productIds, quantities).execute();
   }
 }

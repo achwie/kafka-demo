@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 
@@ -16,14 +15,15 @@ public class OrderDto {
   private final String userId;
   private final List<OrderItemDto> orderItems;
   private final ZonedDateTime orderTime;
+  private final String status;
 
   @JsonCreator
-  public OrderDto(@JsonProperty("id") String id, @JsonProperty("userId") String userId, @JsonProperty("orderTime") ZonedDateTime orderTime,
-      @JsonProperty("orderItems") List<OrderItemDto> orderItems) {
+  public OrderDto(String id, String userId, ZonedDateTime orderTime, List<OrderItemDto> orderItems, String status) {
     this.id = id;
     this.userId = userId;
     this.orderTime = orderTime;
     this.orderItems = orderItems;
+    this.status = status;
   }
 
   public String getId() {
@@ -42,8 +42,13 @@ public class OrderDto {
     return userId;
   }
 
+  public String getStatus() {
+    return status;
+  }
+
   @Override
   public String toString() {
-    return String.format("%s[id: %s, userId: %s, orderTime: %s, orderItems: %s]", getClass().getSimpleName(), id, userId, orderTime, orderItems);
+    return String.format("%s[id: %s, userId: %s, orderTime: %s, orderItems: %s, status: %s]", getClass().getSimpleName(), id, userId, orderTime, orderItems,
+        status);
   }
 }

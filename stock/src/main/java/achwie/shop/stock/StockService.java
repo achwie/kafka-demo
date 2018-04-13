@@ -1,6 +1,8 @@
 package achwie.shop.stock;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,12 +41,12 @@ public class StockService {
    * 
    * @param productIds The products to put a hold on.
    * @param quantities The quantities of the products to put a hold on.
-   * @return {@code true} if a hold could be placed on all products in the
-   *         requested quantities, {@code false} else.
+   * @return A list of product IDs on which <strong>no hold</strong> could be
+   *         placed.
    * @throws IllegalArgumentException If one of the arrays is {@code null} or
    *           they differ in length.
    */
-  public boolean putHoldOnAll(String[] productIds, int[] quantities) {
+  public String[] putHoldOnAll(String[] productIds, int[] quantities) {
     if (productIds == null || quantities == null || productIds.length != quantities.length) {
       // TODO: More helpful message
       throw new IllegalArgumentException("Neither product-ids or quantities must be null and both arrays need to have the same length!");
@@ -52,6 +54,7 @@ public class StockService {
 
     final String[] productIdsPlacedOnHold = new String[productIds.length];
     final int[] quantitiesPlacedOnHold = new int[quantities.length];
+    final List<String> failedToPlaceOnHold = new ArrayList<>();
 
     for (int i = 0; i < productIds.length; i++) {
       final String productId = productIds[i];
@@ -63,12 +66,14 @@ public class StockService {
       quantitiesPlacedOnHold[i] = quantityPlacedOnHold;
 
       if (quantity != quantityPlacedOnHold) {
-        rollbackProductHolds(productIdsPlacedOnHold, quantitiesPlacedOnHold);
-        return false;
+        failedToPlaceOnHold.add(productId);
       }
     }
 
-    return true;
+    if (!failedToPlaceOnHold.isEmpty())
+      rollbackProductHolds(productIdsPlacedOnHold, quantitiesPlacedOnHold);
+
+    return failedToPlaceOnHold.toArray(new String[failedToPlaceOnHold.size()]);
   }
 
   private void rollbackProductHolds(String[] productIds, int[] quantities) {

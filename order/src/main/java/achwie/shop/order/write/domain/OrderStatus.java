@@ -23,5 +23,9 @@ public enum OrderStatus {
    * The payed order has physically been shipped out and is now in transit to
    * the customer.
    */
-  SHIPPED;
+  SHIPPED,
+  /**
+   * The order could not be delivered.
+   */
+  FAILED;
 }

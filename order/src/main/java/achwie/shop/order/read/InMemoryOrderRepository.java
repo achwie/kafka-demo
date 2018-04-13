@@ -114,8 +114,9 @@ public class InMemoryOrderRepository implements OrderReadRepository {
     final String userId = order.getUserId();
     final ZonedDateTime orderTime = order.getOrderTime();
     final List<OrderItemDto> mappedOrderItems = map(order.getItems());
+    final String status = order.getStatus().toString();
 
-    return new OrderDto(id, userId, orderTime, mappedOrderItems);
+    return new OrderDto(id, userId, orderTime, mappedOrderItems, status);
   }
 
   private List<OrderItemDto> map(List<MutableOrderItem> orderItems) {

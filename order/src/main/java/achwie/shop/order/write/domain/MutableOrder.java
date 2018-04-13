@@ -8,6 +8,7 @@ import java.util.Objects;
 
 import achwie.shop.eventstore.DomainEvent;
 import achwie.shop.order.ProductDetails;
+import achwie.shop.order.write.event.FailedToPutHoldOnProducts;
 import achwie.shop.order.write.event.OrderConfirmed;
 import achwie.shop.order.write.event.OrderPayed;
 import achwie.shop.order.write.event.OrderPostedByCustomer;
@@ -87,6 +88,14 @@ public class MutableOrder {
     return evt;
   }
 
+  public FailedToPutHoldOnProducts failToPutHoldOnProducts(List<String> productIdsNotInStock) {
+    final FailedToPutHoldOnProducts evt = new FailedToPutHoldOnProducts(this.id, productIdsNotInStock);
+
+    apply(evt);
+
+    return evt;
+  }
+
   public String toString() {
     return String.format("MutableOrder[id: %s, userId: %s, status: %s, orderTime: %s, items: %s]", id, userId, status, orderTime, items);
   }
@@ -104,6 +113,8 @@ public class MutableOrder {
       handleOrderPayed((OrderPayed) evt);
     } else if (eventType == OrderShipped.class) {
       handleOrderShipped((OrderShipped) evt);
+    } else if (eventType == FailedToPutHoldOnProducts.class) {
+      handleFailedToPutHoldOnProducts((FailedToPutHoldOnProducts) evt);
     } else {
       throw new IllegalArgumentException("Can't handle unknown event of type " + eventType.getName());
     }
@@ -171,6 +182,17 @@ public class MutableOrder {
           String.format("Can't mark different Order as shipped! (orderId: %s, orderId in event: %s)", this.id, evt.getOrderId()));
 
     this.status = OrderStatus.SHIPPED;
+  }
+
+  private void handleFailedToPutHoldOnProducts(FailedToPutHoldOnProducts evt) {
+    if (this.id == null)
+      throw new IllegalStateException("Can't mark uninitialized Order as not in stock! (orderId in event: " + evt.getOrderId() + ")");
+
+    if (evt.getProductIdsNotInStock().isEmpty()) {
+      // WTF??
+    }
+
+    this.status = OrderStatus.FAILED;
   }
 
   private List<MutableOrderItem> createOrderItems(String[] orderedProductIds, int[] orderedQuantities) {

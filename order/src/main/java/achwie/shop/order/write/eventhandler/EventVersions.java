@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import achwie.shop.event.impl.EventVersion;
+import achwie.shop.order.write.event.FailedToPutHoldOnProducts;
 import achwie.shop.order.write.event.OrderConfirmed;
 import achwie.shop.order.write.event.OrderPayed;
 import achwie.shop.order.write.event.OrderPostedByCustomer;
@@ -24,10 +25,13 @@ public class EventVersions implements EventVersion {
   private static final int TYPE_ORDER_REGISTERED = 2;
   private static final int TYPE_ORDER_PAYED = 3;
   private static final int TYPE_ORDER_SHIPPED = 4;
+  private static final int TYPE_ORDER_FAILED_TO_PUT_HOLD_ON_PRODUCTS = 5;
   public static final EventVersions ORDER_POSTED_BY_CUSTOMER_1_0 = new EventVersions(TYPE_ORDER_POSTED_BY_CUSTOMER, 1, OrderPostedByCustomer.class);
   public static final EventVersions ORDER_CONFIRMED_1_0 = new EventVersions(TYPE_ORDER_REGISTERED, 1, OrderConfirmed.class);
   public static final EventVersions ORDER_PAYED_1_0 = new EventVersions(TYPE_ORDER_PAYED, 1, OrderPayed.class);
   public static final EventVersions ORDER_SHIPPED_1_0 = new EventVersions(TYPE_ORDER_SHIPPED, 1, OrderShipped.class);
+  public static final EventVersions ORDER_FAILED_TO_PUT_HOLD_ON_PRODUCTS_1_0 = new EventVersions(TYPE_ORDER_FAILED_TO_PUT_HOLD_ON_PRODUCTS, 1,
+      FailedToPutHoldOnProducts.class);
   private final int typeCode;
   private final int versionCode;
   private final Class<?> eventType;

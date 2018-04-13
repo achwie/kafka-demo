@@ -17,6 +17,7 @@ import achwie.shop.order.CatalogService;
 import achwie.shop.order.ProductDetails;
 import achwie.shop.order.StockService;
 import achwie.shop.order.write.domain.MutableOrder;
+import achwie.shop.order.write.event.FailedToPutHoldOnProducts;
 import achwie.shop.order.write.event.OrderConfirmed;
 import achwie.shop.order.write.event.OrderPostedByCustomer;
 
@@ -49,7 +50,11 @@ public class OrderPostedByCustomerHandler implements EventHandler<OrderPostedByC
     LOG.info("Received order under id {}", order.getId());
 
     // Place hold on products
-    final boolean allProductsAvailable = stockService.putHoldOnAll(event.getProductIds(), event.getQuantities());
+    final List<String> productIdsNotInStock = stockService.putHoldOnAll(event.getProductIds(), event.getQuantities());
+    final boolean allProductsAvailable = productIdsNotInStock.isEmpty();
+
+    // TODO: We also need the product details even if putting a hold on the
+    // products does not succeed
     if (allProductsAvailable) {
       final List<ProductDetails> allProductDetails = getProductDetails(event.getProductIds());
 
@@ -57,7 +62,9 @@ public class OrderPostedByCustomerHandler implements EventHandler<OrderPostedByC
 
       eventStore.save(orderConfirmed.getAggregateId(), orderConfirmed);
     } else {
-      // TODO: Create OrderNotInStock event
+      final FailedToPutHoldOnProducts failedToPutHoldOnOrder = order.failToPutHoldOnProducts(productIdsNotInStock);
+
+      eventStore.save(failedToPutHoldOnOrder.getAggregateId(), failedToPutHoldOnOrder);
     }
   }
 

@@ -39,9 +39,11 @@ public class OrderPayedHandler implements EventHandler<OrderPayed> {
     final List<DomainEvent> orderHistory = eventStore.load(event.getAggregateId());
     final MutableOrder order = new MutableOrder(orderHistory);
 
+    // TODO: Notify fulfillment to ship order (but: wouldn't fulfillment just
+    // also listen for an OrderPayed event?)
     // TODO: Handle shipment (wait for external signal from order fulfillment
     // that order has been dispatched)
-    LOG.info("TODO: Order shipped {}", order.getId());
+    LOG.info("TODO: Order payed {}", order.getId());
 
     final ZonedDateTime shippedTime = ZonedDateTime.now();
 

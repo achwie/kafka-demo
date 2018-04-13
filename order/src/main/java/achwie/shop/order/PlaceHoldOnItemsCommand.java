@@ -1,5 +1,9 @@
 package achwie.shop.order;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
@@ -8,7 +12,7 @@ import org.springframework.web.client.RestOperations;
  * 
  * @author 01.02.2016, Achim Wiedemann
  */
-class PlaceHoldOnItemsCommand extends HystrixRestCommand<Boolean> {
+class PlaceHoldOnItemsCommand extends HystrixRestCommand<List<String>> {
   private final String url;
   private final String[] productIds;
   private final int[] quantities;
@@ -21,14 +25,14 @@ class PlaceHoldOnItemsCommand extends HystrixRestCommand<Boolean> {
   }
 
   @Override
-  protected Boolean run() throws Exception {
+  protected List<String> run() throws Exception {
     final PutProductsOnHoldRequest request = new PutProductsOnHoldRequest();
     request.setProductIds(productIds);
     request.setQuantities(quantities);
 
     try {
-      restOps.postForObject(url, request, String.class);
-      return true;
+      final String[] failedProductIds = restOps.postForObject(url, request, String[].class);
+      return Collections.unmodifiableList(Arrays.asList(failedProductIds));
     } catch (HttpStatusCodeException e) {
       // Returns 409 if there's insufficient stock for one of the ordered items
       // - else we have an error
@@ -43,8 +47,8 @@ class PlaceHoldOnItemsCommand extends HystrixRestCommand<Boolean> {
   }
 
   @Override
-  protected Boolean getFallback() {
-    return false;
+  protected List<String> getFallback() {
+    return Collections.unmodifiableList(Arrays.asList(productIds));
   }
 
   // ---------------------------------------------------------------------------

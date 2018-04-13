@@ -37,24 +37,23 @@ public class StockController {
   }
 
   @RequestMapping(value = "/put-hold-on-all", method = RequestMethod.POST)
-  public ResponseEntity<String> putHoldOnAll(@RequestBody PutProductsOnHoldRequest holdRequest) {
+  public ResponseEntity<String[]> putHoldOnAll(@RequestBody PutProductsOnHoldRequest holdRequest) {
     LatencySimulator.beLatent();
 
-    String msg = "OK";
     HttpStatus code = HttpStatus.OK;
+    String[] failedProductIds;
     try {
-      final boolean success = stockService.putHoldOnAll(holdRequest.getProductIds(), holdRequest.getQuantities());
+      failedProductIds = stockService.putHoldOnAll(holdRequest.getProductIds(), holdRequest.getQuantities());
 
-      if (!success) {
-        msg = "Could not put a hold on one or more products since they are not available in the requested quantity!";
+      if (failedProductIds.length > 0) {
         code = HttpStatus.CONFLICT;
       }
     } catch (IllegalArgumentException e) {
-      msg = e.getMessage();
+      failedProductIds = new String[0];
       code = HttpStatus.BAD_REQUEST;
     }
 
-    return new ResponseEntity<>(msg, code);
+    return new ResponseEntity<>(failedProductIds, code);
   }
 
   // ---------------------------------------------------------------------------
