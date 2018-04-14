@@ -1,6 +1,10 @@
 package achwie.shop.order.write;
 
 import java.time.ZonedDateTime;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import achwie.shop.event.impl.EventHandler;
+import achwie.shop.event.impl.EventHandlerChain;
+import achwie.shop.event.impl.EventVersion;
+import achwie.shop.eventstore.DomainEvent;
 import achwie.shop.eventstore.EventStore;
 import achwie.shop.order.AuthService;
 import achwie.shop.order.CatalogService;
 import achwie.shop.order.ProductDetails;
 import achwie.shop.order.write.domain.MutableOrder;
+import achwie.shop.order.write.domain.OrderStatus;
+import achwie.shop.order.write.event.OrderConfirmed;
 import achwie.shop.order.write.event.OrderPostedByCustomer;
+import achwie.shop.order.write.eventhandler.EventVersions;
 
 /**
  * 
@@ -28,18 +39,23 @@ import achwie.shop.order.write.event.OrderPostedByCustomer;
 @RequestMapping("/orders")
 public class OrderWriteController {
   private static final ResponseEntity<String> RESPONSE_SUCCESS = new ResponseEntity<String>("OK", HttpStatus.OK);
+  private static final ResponseEntity<String> RESPONSE_FAILED = new ResponseEntity<String>("Could not post order (maybe items were not in stock?)",
+      HttpStatus.CONFLICT);
   private static final Logger LOG = LoggerFactory.getLogger(OrderWriteController.class);
   private final EventStore eventStore;
   private final IdGenerator idGenerator;
   private final AuthService authService;
   private final CatalogService catalogService;
+  private final EventHandlerChain handlerChain;
 
   @Autowired
-  public OrderWriteController(EventStore eventStore, IdGenerator idGenerator, AuthService authService, CatalogService catalogService) {
+  public OrderWriteController(EventStore eventStore, IdGenerator idGenerator, AuthService authService, CatalogService catalogService,
+      EventHandlerChain handlerChain) {
     this.eventStore = eventStore;
     this.idGenerator = idGenerator;
     this.authService = authService;
     this.catalogService = catalogService;
+    this.handlerChain = handlerChain;
   }
 
   @RequestMapping(value = "/{sessionId}", method = RequestMethod.POST)
@@ -52,12 +68,12 @@ public class OrderWriteController {
     if (cart == null || cart.isEmpty())
       return new ResponseEntity<String>("ERROR: Can't send an empty order!.", HttpStatus.BAD_REQUEST);
 
-    postOrder(sessionUserId, cart);
+    final boolean success = postOrder(sessionUserId, cart);
 
-    return RESPONSE_SUCCESS;
+    return success ? RESPONSE_SUCCESS : RESPONSE_FAILED;
   }
 
-  private void postOrder(String userId, Cart cart) {
+  private boolean postOrder(String userId, Cart cart) {
     LOG.info("Received order with cart {}", cart);
 
     final int itemCount = cart.getItems().size();
@@ -77,10 +93,7 @@ public class OrderWriteController {
     final String newOrderId = idGenerator.nextOrderId();
     final OrderPostedByCustomer orderPosted = order.postOrder(newOrderId, userId, orderTime, productIds, quantities, allProductDetails);
 
-    eventStore.save(orderPosted.getAggregateId(), orderPosted);
-
-    // TODO: We should wait until the order has been confirmed so the
-    // customer gets direct feedback when items are not in stock
+    return saveAndWaitForOrderConfirmation(orderPosted);
   }
 
   private ProductDetails[] getProductDetails(String[] productIds) {
@@ -96,5 +109,81 @@ public class OrderWriteController {
     }
 
     return allProductDetails;
+  }
+
+  private boolean saveAndWaitForOrderConfirmation(OrderPostedByCustomer orderPosted) {
+    final String orderId = orderPosted.getOrderId();
+
+    final CountDownLatch waitForConfirmationLatch = new CountDownLatch(1);
+    final WaitForOrderConfirmed waitForOrderConfirmedListener = new WaitForOrderConfirmed(orderId, waitForConfirmationLatch);
+    final WaitForOrderFailed waitForOrderFailedListener = new WaitForOrderFailed(orderId, waitForConfirmationLatch);
+
+    handlerChain.addEventHandler(waitForOrderConfirmedListener);
+    handlerChain.addEventHandler(waitForOrderFailedListener);
+
+    boolean success = false;
+    try {
+      eventStore.save(orderPosted.getAggregateId(), orderPosted);
+
+      try {
+        // Wait for async confirmationn/failure of order
+        waitForConfirmationLatch.await(3, TimeUnit.SECONDS);
+
+        final List<DomainEvent> orderHistory = eventStore.load(orderId);
+        final MutableOrder confirmedOrder = new MutableOrder(orderHistory);
+        final OrderStatus confirmedOrderStatus = confirmedOrder.getStatus();
+
+        success = EnumSet.of(OrderStatus.CONFIRMED, OrderStatus.PAYED, OrderStatus.SHIPPED).contains(confirmedOrderStatus);
+      } catch (InterruptedException e) {
+        // Count down latch timed out - order was not confirmed in time
+        Thread.interrupted(); // Reset flag
+      }
+    } finally {
+      handlerChain.removeEventHandler(waitForOrderFailedListener);
+      handlerChain.removeEventHandler(waitForOrderConfirmedListener);
+    }
+
+    return success;
+  }
+
+  // ---------------------------------------------------------------------------
+  private static abstract class WaitForOrderConfirmedOrFailed<T extends DomainEvent> implements EventHandler<T> {
+    private final String orderId;
+    private final CountDownLatch waitForConfirmationLatch;
+
+    public WaitForOrderConfirmedOrFailed(String orderId, CountDownLatch waitForConfirmationLatch) {
+      this.orderId = orderId;
+      this.waitForConfirmationLatch = waitForConfirmationLatch;
+    }
+
+    @Override
+    public void onEvent(T event) {
+      if (event.getAggregateId().equals(orderId)) {
+        waitForConfirmationLatch.countDown();
+      }
+    }
+  }
+
+  private static final class WaitForOrderConfirmed extends WaitForOrderConfirmedOrFailed<OrderConfirmed> {
+    public WaitForOrderConfirmed(String orderId, CountDownLatch waitForConfirmationLatch) {
+      super(orderId, waitForConfirmationLatch);
+    }
+
+    @Override
+    public EventVersion getProcessableEventVersion() {
+      return EventVersions.ORDER_CONFIRMED_1_0;
+    }
+  }
+
+  private static final class WaitForOrderFailed extends WaitForOrderConfirmedOrFailed<OrderConfirmed> {
+
+    public WaitForOrderFailed(String orderId, CountDownLatch waitForConfirmationLatch) {
+      super(orderId, waitForConfirmationLatch);
+    }
+
+    @Override
+    public EventVersion getProcessableEventVersion() {
+      return EventVersions.ORDER_FAILED_TO_PUT_HOLD_ON_PRODUCTS_1_0;
+    }
   }
 }
