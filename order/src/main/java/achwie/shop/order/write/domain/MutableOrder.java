@@ -56,16 +56,16 @@ public class MutableOrder {
   }
 
   public OrderPostedByCustomer postOrder(String newOrderId, String userId, ZonedDateTime orderTime, String[] productIds,
-      int[] quantities) {
-    final OrderPostedByCustomer evt = new OrderPostedByCustomer(newOrderId, userId, orderTime, productIds, quantities);
+      int[] quantities, ProductDetails[] productDetails) {
+    final OrderPostedByCustomer evt = new OrderPostedByCustomer(newOrderId, userId, orderTime, productIds, quantities, productDetails);
 
     apply(evt);
 
     return evt;
   }
 
-  public OrderConfirmed confirmOrder(List<ProductDetails> productDetails) {
-    final OrderConfirmed evt = new OrderConfirmed(this.id, productDetails);
+  public OrderConfirmed confirmOrder() {
+    final OrderConfirmed evt = new OrderConfirmed(this.id);
 
     apply(evt);
 
@@ -127,7 +127,7 @@ public class MutableOrder {
     this.id = evt.getOrderId();
     this.orderTime = evt.getOrderTime();
     this.userId = evt.getUserId();
-    this.items = createOrderItems(evt.getProductIds(), evt.getQuantities());
+    this.items = createOrderItems(evt.getProductIds(), evt.getQuantities(), evt.getProductDetails());
     this.status = OrderStatus.REGISTERED;
   }
 
@@ -140,26 +140,6 @@ public class MutableOrder {
           String.format("Can't confirm order for different Order! (orderId: %s, orderId in event: %s)", this.id, evt.getOrderId()));
 
     this.status = OrderStatus.CONFIRMED;
-    for (ProductDetails productDetails : evt.getProductDetails()) {
-      final MutableOrderItem orderItem = getItem(productDetails.getId());
-      if (orderItem != null) {
-        final MutableProductDetails mutableProductDetails = new MutableProductDetails();
-
-        mutableProductDetails.setProductName(productDetails.getName());
-
-        orderItem.setProductDetails(mutableProductDetails);
-      } else {
-        throw new IllegalArgumentException(String.format("ERROR: No history for product %s which was referenced in event!", productDetails.getId()));
-      }
-    }
-  }
-
-  private MutableOrderItem getItem(String productId) {
-    for (MutableOrderItem item : items)
-      if (item.getProductId().equals(productId))
-        return item;
-
-    return null;
   }
 
   private void handleOrderPayed(OrderPayed evt) {
@@ -195,10 +175,15 @@ public class MutableOrder {
     this.status = OrderStatus.FAILED;
   }
 
-  private List<MutableOrderItem> createOrderItems(String[] orderedProductIds, int[] orderedQuantities) {
+  private List<MutableOrderItem> createOrderItems(String[] orderedProductIds, int[] orderedQuantities, ProductDetails[] productDetails) {
     final List<MutableOrderItem> items = new ArrayList<>();
-    for (int i = 0; i < orderedProductIds.length; i++)
-      items.add(new MutableOrderItem(orderedProductIds[i], orderedQuantities[i]));
+    for (int i = 0; i < orderedProductIds.length; i++) {
+      final String productId = orderedProductIds[i];
+      final int quantity = orderedQuantities[i];
+      final String productName = productDetails[i].getName();
+
+      items.add(new MutableOrderItem(productId, quantity, productName));
+    }
 
     return items;
   }

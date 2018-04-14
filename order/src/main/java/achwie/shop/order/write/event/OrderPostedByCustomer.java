@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import achwie.shop.eventstore.DomainEvent;
+import achwie.shop.order.ProductDetails;
 
 /**
  * An order posted by the customer.
@@ -19,6 +20,7 @@ public class OrderPostedByCustomer implements DomainEvent {
   private final ZonedDateTime orderTime;
   private final String[] productIds;
   private final int[] quantities;
+  private final ProductDetails[] productDetails;
 
   @JsonCreator
   public OrderPostedByCustomer(
@@ -26,12 +28,14 @@ public class OrderPostedByCustomer implements DomainEvent {
       @JsonProperty("userId") String userId,
       @JsonProperty("orderTime") ZonedDateTime orderTime,
       @JsonProperty("productIds") String[] productIds,
-      @JsonProperty("quantities") int[] quantities) {
+      @JsonProperty("quantities") int[] quantities,
+      @JsonProperty("productDetails") ProductDetails[] productDetails) {
     this.orderId = orderId;
     this.userId = userId;
     this.orderTime = orderTime;
     this.productIds = (productIds != null) ? productIds : new String[0];
     this.quantities = (quantities != null) ? quantities : new int[0];
+    this.productDetails = productDetails;
   }
 
   public Object getAggregateId() {
@@ -58,10 +62,15 @@ public class OrderPostedByCustomer implements DomainEvent {
     return quantities;
   }
 
+  public ProductDetails[] getProductDetails() {
+    return productDetails;
+  }
+
   @Override
   public String toString() {
-    return String.format("%s[orderId: %s, usedId: %s, orderTime: %s, productIds: [length:%d], quantities [length:%d]]", getClass().getSimpleName(), orderId,
+    return String.format("%s[orderId: %s, usedId: %s, orderTime: %s, productIds: [length:%d], quantities [length:%d], productDetails: %s]",
+        getClass().getSimpleName(), orderId,
         userId,
-        orderTime, productIds.length, quantities.length);
+        orderTime, productIds.length, quantities.length, productDetails);
   }
 }

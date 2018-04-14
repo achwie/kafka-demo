@@ -6,41 +6,30 @@ package achwie.shop.order.write.domain;
  *
  */
 public class MutableOrderItem {
-  private String productId;
-  private int quantity;
-  private MutableProductDetails productDetails;
+  private final String productId;
+  private final int quantity;
+  private final String productName;
 
-  public MutableOrderItem(String productId, int quantity) {
+  public MutableOrderItem(String productId, int quantity, String productName) {
     this.productId = productId;
     this.quantity = quantity;
+    this.productName = productName;
   }
 
   public String getProductId() {
     return productId;
   }
 
-  public void setProductId(String productId) {
-    this.productId = productId;
-  }
-
   public int getQuantity() {
     return quantity;
   }
 
-  public void setQuantity(int quantity) {
-    this.quantity = quantity;
-  }
-
   public String getProductName() {
-    return productDetails != null ? productDetails.getProductName() : null;
-  }
-
-  public void setProductDetails(MutableProductDetails productDetails) {
-    this.productDetails = productDetails;
+    return productName;
   }
 
   @Override
   public String toString() {
-    return String.format("%s[productId: %s, quantity: %d, productName: %s]", getClass().getSimpleName(), productId, quantity, getProductName());
+    return String.format("%s[productId: %s, quantity: %d, productName: %s]", getClass().getSimpleName(), productId, quantity, productName);
   }
 }

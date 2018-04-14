@@ -1,12 +1,9 @@
 package achwie.shop.order.write.event;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import achwie.shop.eventstore.DomainEvent;
-import achwie.shop.order.ProductDetails;
 
 /**
  * 
@@ -15,12 +12,10 @@ import achwie.shop.order.ProductDetails;
  */
 public class OrderConfirmed implements DomainEvent {
   private final String orderId;
-  private final List<ProductDetails> productDetails;
 
   @JsonCreator
-  public OrderConfirmed(@JsonProperty("orderId") String orderId, @JsonProperty("productDetails") List<ProductDetails> productDetails) {
+  public OrderConfirmed(@JsonProperty("orderId") String orderId) {
     this.orderId = orderId;
-    this.productDetails = productDetails;
   }
 
   public Object getAggregateId() {
@@ -29,10 +24,6 @@ public class OrderConfirmed implements DomainEvent {
 
   public String getOrderId() {
     return orderId;
-  }
-
-  public List<ProductDetails> getProductDetails() {
-    return productDetails;
   }
 
   @Override

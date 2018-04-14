@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -40,8 +39,10 @@ public class MutableOrderTest {
     assertEquals(OrderStatus.REGISTERED, order.getStatus());
     assertEquals("1", order.getItems().get(0).getProductId());
     assertEquals(2, order.getItems().get(0).getQuantity());
+    assertEquals("First", order.getItems().get(0).getProductName());
     assertEquals("2", order.getItems().get(1).getProductId());
     assertEquals(1, order.getItems().get(1).getQuantity());
+    assertEquals("Second", order.getItems().get(1).getProductName());
   }
 
   @Test
@@ -51,10 +52,6 @@ public class MutableOrderTest {
     postOrder(order);
     confirmOrder(order);
 
-    final List<MutableOrderItem> items = order.getItems();
-
-    assertEquals("First", items.get(0).getProductName());
-    assertEquals("Second", items.get(1).getProductName());
     assertEquals(OrderStatus.CONFIRMED, order.getStatus());
   }
 
@@ -103,11 +100,12 @@ public class MutableOrderTest {
   }
 
   private OrderPostedByCustomer postOrder(MutableOrder order) {
-    return order.postOrder(ORDER_ID, USER_ID, NOW, new String[] { "1", "2" }, new int[] { 2, 1 });
+    return order.postOrder(ORDER_ID, USER_ID, NOW, new String[] { "1", "2" }, new int[] { 2, 1 },
+        new ProductDetails[] { productDetails("1", "First"), productDetails("2", "Second") });
   }
 
   private OrderConfirmed confirmOrder(MutableOrder order) {
-    return order.confirmOrder(Arrays.asList(productDetails("1", "First"), productDetails("2", "Second")));
+    return order.confirmOrder();
   }
 
   private OrderPayed payOrder(MutableOrder order) {

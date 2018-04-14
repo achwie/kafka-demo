@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import achwie.shop.eventstore.EventStore;
 import achwie.shop.order.AuthService;
+import achwie.shop.order.CatalogService;
+import achwie.shop.order.ProductDetails;
 import achwie.shop.order.write.domain.MutableOrder;
 import achwie.shop.order.write.event.OrderPostedByCustomer;
 
@@ -30,12 +32,14 @@ public class OrderWriteController {
   private final EventStore eventStore;
   private final IdGenerator idGenerator;
   private final AuthService authService;
+  private final CatalogService catalogService;
 
   @Autowired
-  public OrderWriteController(EventStore eventStore, IdGenerator idGenerator, AuthService authService) {
+  public OrderWriteController(EventStore eventStore, IdGenerator idGenerator, AuthService authService, CatalogService catalogService) {
     this.eventStore = eventStore;
     this.idGenerator = idGenerator;
     this.authService = authService;
+    this.catalogService = catalogService;
   }
 
   @RequestMapping(value = "/{sessionId}", method = RequestMethod.POST)
@@ -67,10 +71,30 @@ public class OrderWriteController {
       quantities[i] = item.getQuantity();
     }
 
+    final ProductDetails[] allProductDetails = getProductDetails(productIds);
+
     final MutableOrder order = new MutableOrder();
     final String newOrderId = idGenerator.nextOrderId();
-    final OrderPostedByCustomer orderPosted = order.postOrder(newOrderId, userId, orderTime, productIds, quantities);
+    final OrderPostedByCustomer orderPosted = order.postOrder(newOrderId, userId, orderTime, productIds, quantities, allProductDetails);
 
     eventStore.save(orderPosted.getAggregateId(), orderPosted);
+
+    // TODO: We should wait until the order has been confirmed so the
+    // customer gets direct feedback when items are not in stock
+  }
+
+  private ProductDetails[] getProductDetails(String[] productIds) {
+    // Not very smart but good enough for the example...
+    ProductDetails[] allProductDetails = new ProductDetails[productIds.length];
+    for (int i = 0; i < productIds.length; i++) {
+      final ProductDetails productDetails = catalogService.fetchProductDetails(productIds[i]);
+      allProductDetails[i] = productDetails;
+      if (productDetails == null) {
+        // TODO: What to do (throw exception? add "special" product details?)
+        LOG.error("Could not get product details for product with ID {}", productIds[i]);
+      }
+    }
+
+    return allProductDetails;
   }
 }
