@@ -1,6 +1,6 @@
 #/bin/ bash
 
-kafka_dir="/opt/kafka_2.11-1.0.0"
+kafka_dir="/opt/kafka_2.12-2.3.0"
 broker_id_default="0"
 instance_type_default="kafka"
 config_listeners_default="PLAINTEXT://:9092"
