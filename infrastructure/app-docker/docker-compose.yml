@@ -1,0 +1,63 @@
+version: '3'
+services:
+  zookeeper:
+    image: achwie/kafka-test:0.1
+    ports:
+      - "2181:2181"
+    environment:
+      - INSTANCE_TYPE=zookeeper
+  kafka_0:
+    image: achwie/kafka-test:0.1
+    ports:
+      - "9092:9092"
+    environment:
+      - BROKER_ID=0
+      - INSTANCE_TYPE=kafka
+      - KAFKA_CONFIG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CONFIG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.56.2:9092
+      - KAFKA_CONFIG_ZK_CONNECT=zookeeper:2181
+  kafka_1:
+    image: achwie/kafka-test:0.1
+    ports:
+      - "9093:9093"
+    environment:
+      - BROKER_ID=1
+      - INSTANCE_TYPE=kafka
+      - KAFKA_CONFIG_LISTENERS=PLAINTEXT://:9093
+      - KAFKA_CONFIG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.56.2:9093
+      - KAFKA_CONFIG_ZK_CONNECT=zookeeper:2181
+  kafka_2:
+    image: achwie/kafka-test:0.1
+    ports:
+      - "9094:9094"
+    environment:
+      - BROKER_ID=2
+      - INSTANCE_TYPE=kafka
+      - KAFKA_CONFIG_LISTENERS=PLAINTEXT://:9094
+      - KAFKA_CONFIG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.56.2:9094
+      - KAFKA_CONFIG_ZK_CONNECT=zookeeper:2181
+  auth:
+    image: achwie/kafka-demo-auth:0.1
+    ports:
+      - "8084:8084"
+  cart:
+    image: achwie/kafka-demo-cart:0.1
+    ports:
+      - "8083:8083"
+  catalog:
+    image: achwie/kafka-demo-catalog:0.1
+    ports: 
+      - "8082:8082"
+  frontend:
+    image: achwie/kafka-demo-frontend:0.1
+    ports: 
+      - "8080:8080"
+  order:
+    image: achwie/kafka-demo-order:0.1
+    ports: 
+      - "8085:8085"
+  stock:
+    image: achwie/kafka-demo-stock:0.1
+    ports: 
+      - "8081:8081"
+  
