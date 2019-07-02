@@ -48,6 +48,8 @@ class PlaceHoldOnItemsCommand extends HystrixRestCommand<List<String>> {
 
   @Override
   protected List<String> getFallback() {
+    logExecutionFailure();
+
     return Collections.unmodifiableList(Arrays.asList(productIds));
   }
 

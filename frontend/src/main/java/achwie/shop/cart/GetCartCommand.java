@@ -59,6 +59,8 @@ class GetCartCommand extends HystrixRestCommand<Cart> {
 
   @Override
   protected Cart getFallback() {
+    logExecutionFailure();
+
     return Cart.EMPTY_CART;
   }
 

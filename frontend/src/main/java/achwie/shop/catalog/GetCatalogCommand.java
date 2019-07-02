@@ -30,6 +30,8 @@ class GetCatalogCommand extends HystrixRestCommand<List<CatalogItem>> {
 
   @Override
   protected List<CatalogItem> getFallback() {
+    logExecutionFailure();
+
     return Collections.emptyList();
   }
 

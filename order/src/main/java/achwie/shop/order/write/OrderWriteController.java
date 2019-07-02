@@ -135,6 +135,7 @@ public class OrderWriteController {
 
         success = EnumSet.of(OrderStatus.CONFIRMED, OrderStatus.PAYED, OrderStatus.SHIPPED).contains(confirmedOrderStatus);
       } catch (InterruptedException e) {
+        LOG.error("Timed out while waiting for order to be saved!", e);
         // Count down latch timed out - order was not confirmed in time
         Thread.interrupted(); // Reset flag
       }

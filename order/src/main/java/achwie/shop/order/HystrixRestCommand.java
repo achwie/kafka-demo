@@ -11,6 +11,7 @@ import com.netflix.hystrix.HystrixCommandGroupKey;
  * 
  * @author 01.02.2016, Achim Wiedemann
  */
+// TODO: Move to shared library (there's the same class in frontend service)
 public abstract class HystrixRestCommand<T> extends HystrixCommand<T> {
   protected final Logger LOG = LoggerFactory.getLogger(getClass());
   protected final RestOperations restOps;
@@ -18,5 +19,16 @@ public abstract class HystrixRestCommand<T> extends HystrixCommand<T> {
   protected HystrixRestCommand(HystrixCommandGroupKey group, RestOperations restOps) {
     super(group);
     this.restOps = restOps;
+  }
+
+  protected void logExecutionFailure(final String errMsg) {
+    final Throwable executionFailureCause = getFailedExecutionException();
+    if (executionFailureCause != null) {
+      LOG.error(errMsg, executionFailureCause);
+    }
+  }
+
+  protected void logExecutionFailure() {
+    logExecutionFailure("Execution of " + getClass().getSimpleName() + " failed!");
   }
 }

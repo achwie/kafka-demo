@@ -20,4 +20,15 @@ public abstract class HystrixRestCommand<T> extends HystrixCommand<T> {
     super(group);
     this.restOps = restOps;
   }
+
+  protected void logExecutionFailure(final String errMsg) {
+    final Throwable executionFailureCause = getFailedExecutionException();
+    if (executionFailureCause != null) {
+      LOG.error(errMsg, executionFailureCause);
+    }
+  }
+
+  protected void logExecutionFailure() {
+    logExecutionFailure("Execution of " + getClass().getSimpleName() + " failed!");
+  }
 }

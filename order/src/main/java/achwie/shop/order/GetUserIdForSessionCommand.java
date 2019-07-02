@@ -26,6 +26,8 @@ class GetUserIdForSessionCommand extends HystrixRestCommand<String> {
 
   @Override
   protected String getFallback() {
+    logExecutionFailure();
+
     return null;
   }
 

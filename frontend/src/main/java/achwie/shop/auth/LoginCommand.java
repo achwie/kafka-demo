@@ -52,6 +52,8 @@ class LoginCommand extends HystrixRestCommand<User> {
 
   @Override
   protected User getFallback() {
+    logExecutionFailure();
+
     return User.ANONYMOUS;
   }
 

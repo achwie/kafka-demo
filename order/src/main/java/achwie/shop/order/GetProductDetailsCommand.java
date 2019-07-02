@@ -23,6 +23,8 @@ public class GetProductDetailsCommand extends HystrixRestCommand<ProductDetails>
 
   @Override
   protected ProductDetails getFallback() {
+    logExecutionFailure();
+
     return null;
   }
 }

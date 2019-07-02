@@ -40,6 +40,8 @@ class GetStockQuantityCommand extends HystrixRestCommand<Integer> {
 
   @Override
   protected Integer getFallback() {
+    logExecutionFailure();
+
     return -1;
   }
 

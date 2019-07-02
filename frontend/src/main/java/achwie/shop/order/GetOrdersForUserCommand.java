@@ -29,6 +29,8 @@ class GetOrdersForUserCommand extends HystrixRestCommand<List<Order>> {
 
   @Override
   protected List<Order> getFallback() {
+    logExecutionFailure();
+
     return Collections.emptyList();
   }
 

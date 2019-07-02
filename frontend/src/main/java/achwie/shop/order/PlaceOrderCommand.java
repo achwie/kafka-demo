@@ -43,6 +43,8 @@ class PlaceOrderCommand extends HystrixRestCommand<Boolean> {
 
   @Override
   protected Boolean getFallback() {
+    logExecutionFailure();
+
     return false;
   }
 }

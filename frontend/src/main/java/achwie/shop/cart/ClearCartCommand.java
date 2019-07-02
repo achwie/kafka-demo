@@ -31,6 +31,8 @@ class ClearCartCommand extends HystrixRestCommand<Void> {
 
   @Override
   protected Void getFallback() {
+    logExecutionFailure();
+
     return null;
   }
 }
