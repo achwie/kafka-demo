@@ -1,17 +1,21 @@
 package achwie.shop.order.write;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.springframework.stereotype.Component;
 
 /**
+ * <strong>Thread safety:</strong> This class is thread safe.
  * 
  * @author 17.03.2018, Achim Wiedemann
  *
  */
 @Component
 public class IdGenerator {
-  private int currentId = 1;
+  private AtomicInteger currentId = new AtomicInteger(0);
 
-  public synchronized String nextOrderId() {
-    return "shop://order/" + Integer.toString(currentId++);
+  public String nextOrderId() {
+    final int currentOrderId = currentId.getAndIncrement();
+    return "shop://order/" + Integer.toString(currentOrderId);
   }
 }
