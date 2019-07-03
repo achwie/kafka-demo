@@ -2,9 +2,9 @@ package achwie.shop.eventstore.inmemory;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import achwie.shop.eventstore.DomainEvent;
@@ -18,20 +18,13 @@ import achwie.shop.eventstore.EventStoreListener;
  * @author 05.04.2018, Achim Wiedemann
  */
 public class InMemoryEventStore implements EventStore {
-  private final Map<Object, List<DomainEvent>> allEvents = new HashMap<>();
+  private final Map<Object, List<DomainEvent>> allEvents = new ConcurrentHashMap<>();
   private final List<EventStoreListener> listeners = new CopyOnWriteArrayList<>();
 
   @Override
   public void save(Object aggregateGuid, DomainEvent event) {
-    List<DomainEvent> eventsForAggregate = allEvents.get(aggregateGuid);
-
-    if (eventsForAggregate == null) {
-      eventsForAggregate = new ArrayList<>();
-      allEvents.put(aggregateGuid, eventsForAggregate);
-    }
-
     fireOnSave(Collections.singletonList(event));
-    eventsForAggregate.add(event);
+    allEvents.computeIfAbsent(aggregateGuid, key -> new ArrayList<>()).add(event);
     fireOnSaved(Collections.singletonList(event));
   }
 
