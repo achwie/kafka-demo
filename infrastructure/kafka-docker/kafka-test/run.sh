@@ -21,4 +21,4 @@ docker run -it --rm \
 	-e "INSTANCE_TYPE=$instance_type" \
 	-e "KAFKA_CONFIG_LISTENERS=$kafka_listeners" \
 	-e "KAFKA_CONFIG_ZK_CONNECT=$kafka_zk_connect" \
-	achwie/kafka-test
+	achwie/kafka-test:0.2

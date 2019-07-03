@@ -6,7 +6,7 @@
 
 # Declare some convenience variables
 service_name=$(basename $(pwd))
-service_version="0.1"
+service_version="0.2"
 
 
 
