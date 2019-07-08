@@ -30,7 +30,6 @@ import achwie.shop.event.impl.kafka.KafkaEventSource;
  */
 @SpringBootApplication
 public class OrderStarterKafka extends AbstractOrderStarter {
-  private static final String BOOTSTRAP_SERVERS = "192.168.56.2:9092,192.168.56.2:9093,192.168.56.2:9094";
 
   public static void main(String[] args) throws Exception {
     SpringApplication.run(OrderStarterKafka.class, args);
@@ -38,10 +37,11 @@ public class OrderStarterKafka extends AbstractOrderStarter {
 
   @Bean
   @Autowired
-  public EventSink createEventSink(EventSerializer eventFactory, @Value("${kafka.topicname.orders}") String topicName) {
+  public EventSink createEventSink(EventSerializer eventFactory, @Value("${kafka.topicname.orders}") String topicName,
+      @Value("${kafka.servers.bootstrap}") String bootstrapServers) {
     // TODO: Properties should be passed in from the outside
     Properties props = new Properties();
-    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     props.put(ProducerConfig.CLIENT_ID_CONFIG, "test-producer");
     // props.put("acks", "all");
     // props.put("retries", 0);
@@ -58,10 +58,11 @@ public class OrderStarterKafka extends AbstractOrderStarter {
 
   @Bean
   @Autowired
-  public EventSource createEventSource(@Value("${kafka.topicname.orders}") String topicName, EventSerializer eventFactory) {
+  public EventSource createEventSource(@Value("${kafka.topicname.orders}") String topicName, @Value("${kafka.servers.bootstrap}") String bootstrapServers,
+      EventSerializer eventFactory) {
     // TODO: Properties should be passed in from the outside
     Properties props = new Properties();
-    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     props.put(ConsumerConfig.GROUP_ID_CONFIG, "test");
     // props.put("enable.auto.commit", "true");
     // props.put("auto.commit.interval.ms", "1000");
