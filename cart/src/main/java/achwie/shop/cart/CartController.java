@@ -5,12 +5,15 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaHandler;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import achwie.shop.cart.message.AddToCartMessage;
+import achwie.shop.cart.message.ClearCartMessage;
 import achwie.shop.util.security.SecurityContext;
 import achwie.shop.util.security.SecurityContextProvider;
 import achwie.shop.util.security.SecurityScope;
@@ -19,6 +22,7 @@ import achwie.shop.util.security.SecurityScope;
  * 
  * @author 11.11.2015, Achim Wiedemann
  */
+@KafkaListener(topics = "${kafka.topic.cart}")
 @RestController
 @RequestMapping("/cart")
 public class CartController {
@@ -47,19 +51,14 @@ public class CartController {
     return new ResponseEntity<Cart>(cart, code);
   }
 
-  @RequestMapping(value = "/{cartId}", method = RequestMethod.POST)
-  public ResponseEntity<String> addToCart(@PathVariable String cartId, @RequestBody CartItem cartItem) {
-    if (cartItem != null && cartItem.getProductId() != null) {
-      cartService.addToCart(cartId, cartItem.getProductId(), cartItem.getProductName(), cartItem.getQuantity());
-      return new ResponseEntity<String>("OK", HttpStatus.OK);
-    } else {
-      return new ResponseEntity<String>("Invalid request!", HttpStatus.BAD_REQUEST);
-    }
+  @KafkaHandler
+  public void onAddToCartMessage(AddToCartMessage addToCart) {
+    cartService.addToCart(addToCart.cartId, addToCart.productId,
+        addToCart.productName, addToCart.quantity);
   }
 
-  @RequestMapping(value = "/{cartId}", method = RequestMethod.DELETE)
-  public void clearCart(@PathVariable String cartId) {
-    cartService.clearCart(cartId);
+  @KafkaHandler
+  public void onClearCartMessage(ClearCartMessage clearCart) {
+    cartService.clearCart(clearCart.cartId);
   }
-
 }

@@ -24,5 +24,9 @@
   
     <a th:if="${user.loggedIn}" id="shipping-address-link" href="order-address">Enter shipping address</a>
     <a th:if="${not user.loggedIn}" id="login-link" href="login">Login to place order</a>
+    
+    <form action="clear-cart" method="POST">
+      <button>Clear cart</button>
+    </form>
   </body>
 </html>

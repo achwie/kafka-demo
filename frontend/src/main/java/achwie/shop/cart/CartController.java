@@ -65,4 +65,10 @@ public class CartController {
 
     return "redirect:catalog";
   }
+
+  @RequestMapping(value = "clear-cart", method = RequestMethod.POST)
+  public String clearCart() {
+    cartService.clearCart(sessionService.getSessionId());
+    return "redirect:catalog";
+  }
 }
