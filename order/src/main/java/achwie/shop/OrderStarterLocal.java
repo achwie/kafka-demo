@@ -2,7 +2,6 @@ package achwie.shop;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import achwie.shop.event.api.EventSink;
@@ -14,7 +13,7 @@ import achwie.shop.event.impl.local.LocalEventSource;
  * 
  * @author 10.03.2018, Achim Wiedemann
  */
-@SpringBootApplication
+// @SpringBootApplication
 public class OrderStarterLocal extends AbstractOrderStarter {
 
   public static void main(String[] args) throws Exception {
