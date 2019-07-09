@@ -1,12 +1,10 @@
 package achwie.shop.order.read;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -14,133 +12,73 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import achwie.shop.event.impl.EventHandler;
-import achwie.shop.event.impl.EventHandlerChain;
-import achwie.shop.event.impl.EventVersion;
 import achwie.shop.eventstore.DomainEvent;
 import achwie.shop.eventstore.EventStore;
 import achwie.shop.order.write.domain.MutableOrder;
 import achwie.shop.order.write.domain.MutableOrderItem;
-import achwie.shop.order.write.eventhandler.EventVersions;
 
 /**
- * A very simple in-memory repository for querying orders.
+ * A simple in-memory repository with a read-projection for querying orders.
  * 
  * @author 20.11.2015, Achim Wiedemann
  */
 @Component
 public class InMemoryOrderRepository implements OrderReadRepository {
   private static final Logger LOG = LoggerFactory.getLogger(InMemoryOrderRepository.class);
-  private final Object lock = new Object();
-  private final Map<String, List<OrderDto>> orders = new HashMap<>();
+  private final Map<String, List<OrderDto>> orders = new ConcurrentHashMap<>();
   private final EventStore eventStore;
 
   @Autowired
-  public InMemoryOrderRepository(EventHandlerChain handlerChain, EventStore eventStore) {
+  public InMemoryOrderRepository(EventStore eventStore) {
     this.eventStore = eventStore;
-
-    // Listen to order events to update read projection
-    for (EventVersions eventVersion : EventVersions.allVersions())
-      handlerChain.addEventHandler(new AggregateChangedHandler(eventVersion));
   }
 
   public List<OrderDto> getOrdersForUser(String userId) {
-    if (userId == null)
-      return Collections.emptyList();
-
-    synchronized (lock) {
-      final List<OrderDto> ordersForUser = orders.get(userId);
-
-      if (ordersForUser == null)
-        return Collections.emptyList();
-
-      return ordersForUser;
-    }
+    return (userId != null) ? getOrCreateOrdersForUsers(userId) : Collections.emptyList();
   }
 
-  public void save(OrderDto order) {
-    final String userId = order.getUserId();
-
-    // Use a global lock across all customers for simplicity
-    synchronized (lock) {
-      List<OrderDto> ordersForUser = orders.get(userId);
-      if (ordersForUser == null) {
-        ordersForUser = new ArrayList<>();
-        orders.put(userId, ordersForUser);
-      } else {
-        // Probably this order already exists (if so, replace by new one)
-        final OrderDto currentOrder = get(userId, order.getId());
-        if (currentOrder != null) {
-          ordersForUser.remove(currentOrder);
-        }
-      }
-
-      ordersForUser.add(order);
-
-      LOG.debug("Added order for user (userId: {}): {}", userId, order);
-
-      // Sort on save (assume more reads than writes)
-      Collections.sort(ordersForUser, new Comparator<OrderDto>() {
-        @Override
-        public int compare(OrderDto o1, OrderDto o2) {
-          return o1.getOrderTime().compareTo(o2.getOrderTime());
-        }
-      });
-    }
-  }
-
-  private OrderDto get(String customerId, String orderId) {
-    List<OrderDto> ordersForUser = orders.get(customerId);
-    return ordersForUser.stream().filter(o -> o.getId().equals(orderId)).findFirst().orElse(null);
-  }
-
-  private void onAggregateChanged(DomainEvent event) {
-    if (event == null)
+  void update(String userId, String orderId) {
+    if (userId == null || orderId == null)
       return;
 
-    LOG.debug("Received event for aggregate: {}", event);
+    final List<OrderDto> ordersForUser = getOrCreateOrdersForUsers(userId);
 
-    // Really simple: load latest order and replace old version with it
-    final List<DomainEvent> orderHistory = eventStore.load(event.getAggregateId());
-    final MutableOrder order = new MutableOrder(orderHistory);
+    synchronized (ordersForUser) {
+      final OrderDto updatedOrder = loadOrder(orderId);
+      for (int i = 0; i < ordersForUser.size(); i++) {
+        final OrderDto o = ordersForUser.get(i);
+        if (orderId.equals(o.getId())) {
+          ordersForUser.set(i, updatedOrder);
+          LOG.info("Updated order {} for user {}", orderId, userId);
+          return;
+        }
+      }
+      ordersForUser.add(updatedOrder);
+      LOG.info("Added order {} for user {}", orderId, userId);
+    }
+  }
 
-    final OrderDto mappedOrder = map(order);
+  private List<OrderDto> getOrCreateOrdersForUsers(String userId) {
+    return orders.computeIfAbsent(userId, uid -> new ArrayList<>());
+  }
 
-    save(mappedOrder);
+  private OrderDto loadOrder(String orderId) {
+    final List<DomainEvent> orderEvents = eventStore.load(orderId);
+    MutableOrder order = new MutableOrder(orderEvents);
+
+    return map(order);
   }
 
   private OrderDto map(MutableOrder order) {
-    final String id = order.getId();
-    final String userId = order.getUserId();
-    final ZonedDateTime orderTime = order.getOrderTime();
-    final List<OrderItemDto> mappedOrderItems = map(order.getItems());
-    final String status = order.getStatus().toString();
-
-    return new OrderDto(id, userId, orderTime, mappedOrderItems, status);
+    return new OrderDto(
+        order.getId(),
+        order.getUserId(),
+        order.getOrderTime(),
+        order.getItems().stream().map(this::map).collect(Collectors.toList()),
+        order.getStatus().toString());
   }
 
-  private List<OrderItemDto> map(List<MutableOrderItem> orderItems) {
-    return orderItems.stream()
-        .map(i -> new OrderItemDto(i.getProductId(), i.getProductName(), i.getQuantity()))
-        .collect(Collectors.toList());
-  }
-
-  // ---------------------------------------------------------------------------
-  private class AggregateChangedHandler implements EventHandler<DomainEvent> {
-    private final EventVersion processableEventVersion;
-
-    public AggregateChangedHandler(EventVersion processableEventVersion) {
-      this.processableEventVersion = processableEventVersion;
-    }
-
-    @Override
-    public void onEvent(DomainEvent event) {
-      onAggregateChanged(event);
-    }
-
-    @Override
-    public EventVersion getProcessableEventVersion() {
-      return processableEventVersion;
-    }
+  private OrderItemDto map(MutableOrderItem orderItem) {
+    return new OrderItemDto(orderItem.getProductId(), orderItem.getProductName(), orderItem.getQuantity());
   }
 }

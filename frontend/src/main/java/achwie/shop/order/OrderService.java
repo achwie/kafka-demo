@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,11 +19,16 @@ import achwie.shop.cart.Cart;
 public class OrderService {
   private final RestTemplate restTemplate;
   private final String orderServiceBaseUrl;
+  private final KafkaTemplate<String, SubmitOrderMessage> kafkaTemplate;
+  private final String kafkaTopicOrder;
 
   @Autowired
-  public OrderService(@Value("${service.order.baseurl}") String orderServiceBaseUrl, RestTemplate restTemplate) {
-    this.restTemplate = restTemplate;
+  public OrderService(@Value("${service.order.baseurl}") String orderServiceBaseUrl, RestTemplate restTemplate,
+      @Value("${kafka.topic.order}") String kafkaTopicOrder, KafkaTemplate<String, SubmitOrderMessage> kafkaTemplate) {
     this.orderServiceBaseUrl = orderServiceBaseUrl;
+    this.restTemplate = restTemplate;
+    this.kafkaTemplate = kafkaTemplate;
+    this.kafkaTopicOrder = kafkaTopicOrder;
   }
 
   /**
@@ -34,8 +40,8 @@ public class OrderService {
    * @return {@code true} if the order was successful, {@code false} else (e.g.
    *         because there were not enough items on stock).
    */
-  public boolean placeOrder(String sessionId, Cart cart) {
-    return new PlaceOrderCommand(restTemplate, orderServiceBaseUrl, sessionId, cart).execute();
+  public void placeOrder(String sessionId, Cart cart) {
+    kafkaTemplate.send(kafkaTopicOrder, new SubmitOrderMessage(sessionId, cart));
   }
 
   /**

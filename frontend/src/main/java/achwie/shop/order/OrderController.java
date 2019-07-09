@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import achwie.shop.auth.SessionService;
-import achwie.shop.auth.User;
 import achwie.shop.cart.Cart;
 import achwie.shop.cart.CartService;
 
@@ -54,19 +53,10 @@ public class OrderController {
       return "redirect:order-address";
     }
 
-    final boolean success = orderService.placeOrder(sessionId, cart);
+    orderService.placeOrder(sessionId, cart);
 
-    if (success) {
-      cartService.clearCart(sessionId);
-      return "redirect:order-placed";
-    } else {
-      final User user = sessionService.getSessionUser();
-      LOG.warn("Order with session {} for user {} could not be placed (this might be because of insufficient availability of some products)!", sessionId,
-          user.getUserName());
-    }
-
-    // TODO: User feedback
-    return "redirect:order-address";
+    cartService.clearCart(sessionId);
+    return "redirect:order-placed";
   }
 
   @RequestMapping(value = "order-placed", method = RequestMethod.GET)

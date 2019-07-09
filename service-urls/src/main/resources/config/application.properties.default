@@ -27,11 +27,9 @@ service.auth.baseurl = http://localhost:${service.auth.port}/auth
 service.order.port=8085
 service.order.baseurl = http://localhost:${service.order.port}/orders
 
-# Apache Kafka (raw client)
-kafka.servers.bootstrap=my-kafka-node1:9093,my-kafka-node2:9093
-
 # Apache Kafka (Spring Kafka)
 spring.kafka.bootstrap-servers=my-kafka-node1:9093,my-kafka-node2:9093
 
 # Kafka Topics
 kafka.topic.cart = cart
+kafka.topic.order = order
