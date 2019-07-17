@@ -15,7 +15,7 @@ import achwie.shop.eventstore.EventStore;
 import achwie.shop.order.AuthService;
 import achwie.shop.order.CatalogService;
 import achwie.shop.order.ProductDetails;
-import achwie.shop.order.message.OrderUpdatedEvent;
+import achwie.shop.order.message.PutProductsOnHoldMessage;
 import achwie.shop.order.message.SubmitOrderMessage;
 import achwie.shop.order.write.domain.MutableOrder;
 import achwie.shop.order.write.event.OrderPostedByCustomer;
@@ -80,7 +80,12 @@ public class OrderWriteController {
     final OrderPostedByCustomer orderPosted = order.postOrder(newOrderId, userId, orderTime, productIds, quantities, allProductDetails);
 
     eventStore.save(orderPosted.getAggregateId(), orderPosted);
-    kafkaTemplate.send(kafkaTopicOrder, new OrderUpdatedEvent(orderPosted.getUserId(), orderPosted.getOrderId()));
+    // TODO: Only save order if user has entered an address
+    // TODO: Only save order if items are in stock
+    kafkaTemplate.send(kafkaTopicOrder, new PutProductsOnHoldMessage(orderPosted.getOrderId(), productIds, quantities));
+    // TODO: Send notification so third parties can react (e.g. flush cache)
+    // kafkaTemplate.send(kafkaTopicOrder, new
+    // OrderUpdatedEvent(orderPosted.getUserId(), orderPosted.getOrderId()));
   }
 
   private ProductDetails[] getProductDetails(String[] productIds) {

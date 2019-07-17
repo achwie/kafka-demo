@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import achwie.shop.util.latency.LatencySimulator;
+
 /**
  * 
  * @author 11.11.2015, Achim Wiedemann
@@ -14,10 +16,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class StockService {
   private final StockRepository stockRepo;
+  private final LatencySimulator latencySimulator;
 
   @Autowired
-  public StockService(StockRepository stockRepo) {
+  public StockService(StockRepository stockRepo, LatencySimulator latencySimulator) {
     this.stockRepo = stockRepo;
+    this.latencySimulator = latencySimulator;
   }
 
   /**
@@ -28,6 +32,8 @@ public class StockService {
    *         according stock count entry.
    */
   public int getStockQuantity(String productId) {
+    latencySimulator.beLatent();
+
     final int[] quantities = stockRepo.getQuantities(Arrays.asList(productId));
 
     return quantities[0];
@@ -47,6 +53,8 @@ public class StockService {
    *           they differ in length.
    */
   public String[] putHoldOnAll(String[] productIds, int[] quantities) {
+    latencySimulator.beLatent();
+
     if (productIds == null || quantities == null || productIds.length != quantities.length) {
       // TODO: More helpful message
       throw new IllegalArgumentException("Neither product-ids or quantities must be null and both arrays need to have the same length!");

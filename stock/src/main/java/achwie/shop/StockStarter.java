@@ -1,12 +1,11 @@
 package achwie.shop;
 
-import java.lang.management.ManagementFactory;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
+import java.util.HashMap;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.jmx.export.MBeanExporter;
 
 import achwie.shop.util.latency.LatencySimulator;
 
@@ -17,12 +16,23 @@ import achwie.shop.util.latency.LatencySimulator;
 @SpringBootApplication
 public class StockStarter {
   public static void main(String[] args) throws Exception {
-    // Register MBean
-    final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-    final ObjectName name = ObjectName.getInstance(LatencySimulator.OBJECT_NAME);
-    final LatencySimulator mbean = new LatencySimulator();
-    mbs.registerMBean(mbean, name);
-
     SpringApplication.run(StockStarter.class, args);
   }
+
+  @Bean
+  public LatencySimulator createLatencySimulator() {
+    return new LatencySimulator();
+  }
+
+  @Bean
+  public MBeanExporter createMBeanExporter(LatencySimulator latencySimulator) {
+    final var beans = new HashMap<String, Object>();
+    beans.put(LatencySimulator.OBJECT_NAME, latencySimulator);
+
+    final var mBeanExporter = new MBeanExporter();
+    mBeanExporter.setBeans(beans);
+
+    return mBeanExporter;
+  }
+
 }

@@ -1,10 +1,5 @@
 package achwie.shop.util.latency;
 
-import java.lang.management.ManagementFactory;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 /**
  * This MBean implements a latency service to introduce artificial latency into
  * a service.
@@ -13,7 +8,7 @@ import javax.management.ObjectName;
  *
  */
 public class LatencySimulator implements LatencySimulatorMBean {
-  public static final String OBJECT_NAME = "achwie.hystrixdemo:type=LatencySimulator";
+  public static final String OBJECT_NAME = "achwie.kafka-demo:type=LatencySimulator";
   private volatile int latencyMillis = 0;
 
   /**
@@ -38,13 +33,8 @@ public class LatencySimulator implements LatencySimulatorMBean {
    * Lets the current thread sleep for the amount of milliseconds specified via
    * {@link #setLatencyMillis(int)}.
    */
-  public static void beLatent() {
+  public void beLatent() {
     try {
-      // For sure this could be done more clever with Spring
-      final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-      final ObjectName name = ObjectName.getInstance(LatencySimulator.OBJECT_NAME);
-      final Integer latencyMillis = (Integer) mbs.getAttribute(name, "LatencyMillis");
-
       if (latencyMillis > 0) {
         try {
           Thread.sleep(latencyMillis);
