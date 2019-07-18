@@ -15,6 +15,8 @@ import achwie.shop.eventstore.EventStore;
 import achwie.shop.order.AuthService;
 import achwie.shop.order.CatalogService;
 import achwie.shop.order.ProductDetails;
+import achwie.shop.order.message.OrderConfirmedEvent;
+import achwie.shop.order.message.OrderUpdatedEvent;
 import achwie.shop.order.message.PutProductsOnHoldMessage;
 import achwie.shop.order.message.SubmitOrderMessage;
 import achwie.shop.order.write.domain.MutableOrder;
@@ -52,6 +54,19 @@ public class OrderWriteController {
     final String sessionUserId = authService.getUserIdForSession(sessionId);
 
     postOrder(sessionUserId, new Cart(submitOrderMessage.getItems()));
+  }
+
+  @KafkaHandler
+  public void onOrderConfirmed(OrderConfirmedEvent orderConfirmedEvent) {
+    final var orderId = orderConfirmedEvent.getOrderId();
+    final var orderEvents = eventStore.load(orderId);
+    final var order = new MutableOrder(orderEvents);
+
+    final var orderConfirmed = order.confirmOrder();
+
+    eventStore.save(orderConfirmed.getAggregateId(), orderConfirmed);
+
+    kafkaTemplate.send(kafkaTopicOrder, new OrderUpdatedEvent(order.getUserId(), orderId));
   }
 
   @KafkaHandler(isDefault = true)

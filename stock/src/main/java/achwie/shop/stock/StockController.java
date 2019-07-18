@@ -5,10 +5,12 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,10 +28,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class StockController {
   private static final Logger LOG = LoggerFactory.getLogger(StockController.class);
   private final StockService stockService;
+  private final KafkaTemplate<String, Object> kafkaTemplate;
+  private final String kafkaOrderTopic;
 
   @Autowired
-  public StockController(StockService stockService) {
+  public StockController(StockService stockService, KafkaTemplate<String, Object> kafkaTemplate, @Value("${kafka.topic.order}") String kafkaOrderTopic) {
     this.stockService = stockService;
+    this.kafkaTemplate = kafkaTemplate;
+    this.kafkaOrderTopic = kafkaOrderTopic;
   }
 
   @RequestMapping(value = "/{productId}", method = RequestMethod.GET)
@@ -44,7 +50,9 @@ public class StockController {
   public void onPutHoldOnOrder(PutProductsOnHoldRequest putHoldOnOrder) {
     final var failedProductIds = stockService.putHoldOnAll(putHoldOnOrder.getProductIds(), putHoldOnOrder.getQuantities());
 
-    if (failedProductIds.length > 0) {
+    if (failedProductIds.length == 0) {
+      kafkaTemplate.send(kafkaOrderTopic, new OrderConfirmedEvent(putHoldOnOrder.getOrderId()));
+    } else {
       // TODO: Handle error more thoroughly (e.g. send message)
       LOG.error("Put hold on order (failed pids: {})!", Arrays.asList(failedProductIds));
     }

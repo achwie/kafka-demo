@@ -16,6 +16,7 @@ public interface EventStore {
    * @param aggregateGuid The GUID of the aggrate that this event belongs to
    * @param event The event to store
    */
+  // TODO: Param aggregateGuid seems redundant (ID is already in DomainEvent)
   public void save(Object aggregateGuid, DomainEvent event);
 
   /**
