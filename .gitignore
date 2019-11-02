@@ -7,6 +7,10 @@
 # EGit seems to create these in every module
 */.gitignore
 
+# IntelliJ files
+.idea/*
+*.iml
+
 # Compiled files
 */target/*
 
