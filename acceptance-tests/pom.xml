@@ -9,7 +9,7 @@
   <!-- Not using parent POM here since Spring Boot seems to mess up my Selenium 
     config -->
   <properties>
-    <junit.version>4.12</junit.version>
+    <junit.version>4.13.1</junit.version>
     <selenium.version>2.48.2</selenium.version>
     <jgiven.version>0.14.1</jgiven.version>
   </properties>
